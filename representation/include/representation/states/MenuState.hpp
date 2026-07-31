@@ -17,9 +17,9 @@ namespace bomberman::representation {
 
         explicit MenuState(StateManager& manager);
 
-        void handleEvent(const sf::Event& event) override; // TODO
-        void update(float deltaTime) override;              // TODO
-        void render(sf::RenderWindow& window) override;     // TODO
+        void handleEvent(const sf::Event& event) override;
+        void update(float deltaTime) override;
+        void render(sf::RenderWindow& window) override;
 
     private:
     bomberman::logic::Score score; // Used read-only here, just to load and display the top-5.
