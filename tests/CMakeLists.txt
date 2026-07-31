@@ -1,0 +1,5 @@
+add_executable(bomberman_tests test_main.cpp)
+target_link_libraries(bomberman_tests PRIVATE bomberman_logic)
+target_compile_features(bomberman_tests PRIVATE cxx_std_17)
+
+add_test(NAME bomberman_tests COMMAND bomberman_tests)
