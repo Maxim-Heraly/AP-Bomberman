@@ -18,8 +18,8 @@ namespace bomberman::representation {
  */
 class CharacterView : public EntityView {
 public:
-    explicit CharacterView(std::shared_ptr<const bomberman::logic::Character> model)
-        : model(std::move(model)) {}
+    CharacterView(std::shared_ptr<const bomberman::logic::Character> model, std::shared_ptr<sf::Texture> texture);
+
 
     void onNotify(const bomberman::logic::Subject& source, bomberman::logic::EventType event) override; // TODO
     void draw(sf::RenderWindow& window, const Camera& camera) override; // TODO
@@ -27,6 +27,9 @@ public:
 private:
     std::shared_ptr<const bomberman::logic::Character> model;
     // TODO: sf::Sprite sprite_; animation frame index + timer, one walk-cycle per Direction, a death animation, ...
+    sf::Sprite sprite;
+    std::shared_ptr<sf::Texture> texture;
+    bool useSprite{true};
 };
 
 } // namespace bomberman::representation

@@ -32,7 +32,7 @@ void MenuState::render(sf::RenderWindow& window) {
     const sf::Vector2u windowSize = window.getSize();
     const float centerX = static_cast<float>(windowSize.x) * 0.5f;
     sf::Font font;
-    if (!font.loadFromFile("../../assets/fonts/DejaVuSans.ttf"))
+    if (!font.loadFromFile("../../assets/fonts/PublicPixel-rv0pA.ttf"))
     {
         std::printf("Failed to load font\n");
     }

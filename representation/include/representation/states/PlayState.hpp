@@ -2,10 +2,13 @@
 
 #include "logic/Score.hpp"
 #include "logic/World.hpp"
+#include "logic/utils/Direction.hpp"
 #include "representation/Camera.hpp"
 #include "representation/ConcreteFactory.hpp"
 #include "representation/states/State.hpp"
 #include <memory>
+
+#include "logic/entities/Player.hpp"
 
 namespace bomberman::representation {
 
@@ -33,6 +36,9 @@ private:
     bomberman::logic::World world;
     std::shared_ptr<bomberman::logic::Score> score;
     Camera camera;
+    bomberman::logic::Direction movementDirection{bomberman::logic::Direction::None};
+
+    std::shared_ptr<bomberman::logic::Character> demoPlayer;
 };
 
 } // namespace bomberman::representation

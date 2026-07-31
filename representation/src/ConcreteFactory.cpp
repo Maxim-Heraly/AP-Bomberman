@@ -15,14 +15,31 @@ namespace bomberman::representation {
 
 using namespace bomberman::logic;
 
+ConcreteFactory::ConcreteFactory() {
+    characterTexture = std::make_shared<sf::Texture>();
+    if (!characterTexture->loadFromFile(ASSET_DIR "/spritesheets/character_sprites.png")) {
+        throw std::runtime_error("Failed to load character texture");
+    }
+}
+
 std::shared_ptr<Character> ConcreteFactory::createCharacter(Vector2 position, bool isPlayer) {
     // TODO: pick a fixed size (e.g. {0.08f, 0.08f}), construct a Player or a
     // Bot depending on isPlayer, construct a matching CharacterView,
     // model->attach(view), store the view in views_, return the model. See
     // the ConcreteFactory.hpp doc comment for the full 5-step recipe.
-    (void)position;
-    (void)isPlayer;
-    return nullptr;
+    Vector2 characterSize{0.08f, 0.08f};
+    std::shared_ptr<Character> model;
+
+    if (isPlayer) {
+        model = std::make_shared<Player>(position, characterSize);
+    } else {
+        model = std::make_shared<Bot>(position, characterSize);
+    }
+
+    auto view = std::make_shared<CharacterView>(model, characterTexture);
+    model->attach(view);
+    views.push_back(view);
+    return model;
 }
 
 std::shared_ptr<Bomb> ConcreteFactory::createBomb(Vector2 position, Character& owner) {

@@ -26,6 +26,8 @@ namespace bomberman::representation {
  */
 class ConcreteFactory : public bomberman::logic::AbstractFactory {
 public:
+    ConcreteFactory();
+
     std::shared_ptr<bomberman::logic::Character> createCharacter(
         bomberman::logic::Vector2 position, bool isPlayer) override;
     std::shared_ptr<bomberman::logic::Bomb> createBomb(
@@ -39,6 +41,7 @@ public:
 
 private:
     std::vector<std::shared_ptr<EntityView>> views;
+    std::shared_ptr<sf::Texture> characterTexture;
 };
 
 } // namespace bomberman::representation
