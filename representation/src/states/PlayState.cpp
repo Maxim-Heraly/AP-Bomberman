@@ -1,5 +1,6 @@
 #include "representation/states/PlayState.hpp"
 #include "representation/states/MenuState.hpp"
+#include "logic/entities/Character.hpp"
 
 namespace bomberman::representation {
 
@@ -10,7 +11,6 @@ PlayState::PlayState(StateManager& manager)
       score(std::make_shared<bomberman::logic::Score>()),
       camera(800, 800) { // TODO: pass in the real window size instead of hardcoding it.
     world.initialize();
-    demoPlayer = factory->createCharacter({0.f, 0.f}, true);
     // TODO: attach score_ as an Observer to every relevant EntityModel - or,
     // simpler, give World a way to attach a "global" observer (e.g. to the
     // Player, plus every Wall/PowerUp as they're created) so Score doesn't
@@ -29,28 +29,31 @@ namespace {
     }}
 
 void PlayState::handleEvent(const sf::Event& event) {
-    if (!demoPlayer) return;
+    const auto player = world.getPlayer();
+    if (!player) return;
 
     if (event.type == sf::Event::KeyPressed) {
         const auto direction = keyToDirection(event.key.code);
         if (direction != bomberman::logic::Direction::None) {
             movementDirection = direction;
-            demoPlayer->setMovementInput(direction);
+            player->setMovementInput(direction);
         }
     } else if (event.type == sf::Event::KeyReleased) {
         const auto direction = keyToDirection(event.key.code);
         if (direction != bomberman::logic::Direction::None && movementDirection == direction) {
             movementDirection = bomberman::logic::Direction::None;
-            demoPlayer->setMovementInput(bomberman::logic::Direction::None);
+            player->setMovementInput(bomberman::logic::Direction::None);
         }
     }
 }
 
 void PlayState::update(float deltaTime) {
-    if (demoPlayer) {
-        demoPlayer->update(deltaTime);
-    }
     world.update(deltaTime);
+
+    for (const auto& view : factory->getViews()) {
+        view->update(deltaTime);
+    }
+
     // TODO: if (world_.isGameOver()) {
     //     score_->saveHighScores(...);
     //     manager_.changeState(std::make_unique<MenuState>(manager_));

@@ -24,6 +24,7 @@ public:
 
     /// TODO: draw this entity's current sprite, projected through camera,
     /// onto window. Called once per frame by PlayState::render().
+    virtual void update(float deltaTime) {(void)deltaTime;}
     virtual void draw(sf::RenderWindow& window, const Camera& camera) = 0;
 
     /// Set (by onNotify(), on EventType::Died, once any death animation has

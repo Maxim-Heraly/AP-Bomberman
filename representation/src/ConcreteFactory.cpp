@@ -29,14 +29,21 @@ std::shared_ptr<Character> ConcreteFactory::createCharacter(Vector2 position, bo
     // the ConcreteFactory.hpp doc comment for the full 5-step recipe.
     Vector2 characterSize{0.08f, 0.08f};
     std::shared_ptr<Character> model;
-
     if (isPlayer) {
         model = std::make_shared<Player>(position, characterSize);
     } else {
         model = std::make_shared<Bot>(position, characterSize);
     }
 
-    auto view = std::make_shared<CharacterView>(model, characterTexture);
+    const auto variant = isPlayer
+        ? CharacterSpriteVariant::Player
+        : static_cast<CharacterSpriteVariant>(1 + (nextBotVariant++ % 3));
+
+    auto view = std::make_shared<CharacterView>(
+        model,
+        characterTexture,
+        makeCharacterAnimationSet(variant));
+
     model->attach(view);
     views.push_back(view);
     return model;

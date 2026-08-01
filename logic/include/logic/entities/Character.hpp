@@ -35,6 +35,7 @@ public:
     int getMaxBombs() const { return maxBombs; }
     float getSpeed() const { return speed; }
     Direction getFacing() const { return facing; }
+    bool isMoving() const { return movementInput != Direction::None; }
 
     /// Called each frame by Game/PlayState (for the Player, translated from
     /// arrow-key presses) or by the bot AI (for a Bot) to queue up a

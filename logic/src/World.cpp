@@ -10,8 +10,11 @@ World::World(std::shared_ptr<AbstractFactory> factory) : factory(std::move(facto
 
 void World::initialize() {
     generateArena();
+    if (!player) {
+        player = factory->createCharacter({-0.9f, -0.9f}, true); // Player top-left
+        entities.push_back(player);
+    }
 }
-
 void World::update(float deltaTime) {
     // TODO, suggested order:
     // 1. for each Bot in entities_: decideNextMove(*this)
@@ -20,7 +23,9 @@ void World::update(float deltaTime) {
     // 4. for each Bomb with hasExploded(): explode(*bomb)
     // 5. erase-remove every entity with !isAlive() from entities_
     // 6. update gameOver_ (Player died, or Player is the last Character standing)
-    (void)deltaTime;
+    for (const auto& entity : entities) {
+        entity->update(deltaTime);
+    }
 }
 
 void World::placeBomb(Character& owner) {

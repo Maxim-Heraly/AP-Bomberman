@@ -8,7 +8,6 @@
 #include "representation/states/State.hpp"
 #include <memory>
 
-#include "logic/entities/Player.hpp"
 
 namespace bomberman::representation {
 
@@ -37,8 +36,6 @@ private:
     std::shared_ptr<bomberman::logic::Score> score;
     Camera camera;
     bomberman::logic::Direction movementDirection{bomberman::logic::Direction::None};
-
-    std::shared_ptr<bomberman::logic::Character> demoPlayer;
 };
 
 } // namespace bomberman::representation
