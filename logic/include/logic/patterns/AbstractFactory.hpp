@@ -30,7 +30,7 @@ public:
     virtual ~AbstractFactory() = default;
 
     virtual std::shared_ptr<Character> createCharacter(Vector2 position, bool isPlayer) = 0;
-    virtual std::shared_ptr<Bomb> createBomb(Vector2 position, Character& owner) = 0;
+    virtual std::shared_ptr<Bomb> createBomb(Vector2 position, std::shared_ptr<Character> owner) = 0;
     virtual std::shared_ptr<Wall> createWall(Vector2 position, bool destructible) = 0;
     virtual std::shared_ptr<PowerUp> createPowerUp(Vector2 position, PowerUpType type) = 0;
 };

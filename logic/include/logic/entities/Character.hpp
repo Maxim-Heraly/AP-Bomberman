@@ -23,7 +23,17 @@ public:
     void update(float deltaTime) override; // TODO
 
     /// TODO: World should check this before creating a Bomb via the factory.
-    bool canPlaceBomb() const;
+    [[nodiscard]] bool canPlaceBomb() const;
+
+    bool tryPlaceBomb() {
+        if (!canPlaceBomb()) return false;
+        ++bombsPlaced;
+        return true;
+    }
+
+    void onBombExploded() {
+        if (bombsPlaced > 0) --bombsPlaced;
+    }
 
     // --- Power-up hooks -------------------------------------------------
     // TODO: call these from FirePowerUp/BombPowerUp/SkatesPowerUp::applyEffect().
@@ -31,11 +41,11 @@ public:
     void increaseMaxBombs(int amount) { maxBombs += amount; }
     void increaseSpeed(float amount) { speed += amount; }
 
-    int getBombRadius() const { return bombRadius; }
-    int getMaxBombs() const { return maxBombs; }
-    float getSpeed() const { return speed; }
-    Direction getFacing() const { return facing; }
-    bool isMoving() const { return movementInput != Direction::None; }
+    [[nodiscard]] int getBombRadius() const { return bombRadius; }
+    [[nodiscard]] int getMaxBombs() const { return maxBombs; }
+    [[nodiscard]] float getSpeed() const { return speed; }
+    [[nodiscard]] Direction getFacing() const { return facing; }
+    [[nodiscard]] bool isMoving() const { return movementInput != Direction::None; }
 
     /// Called each frame by Game/PlayState (for the Player, translated from
     /// arrow-key presses) or by the bot AI (for a Bot) to queue up a

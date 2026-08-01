@@ -33,6 +33,11 @@ void PlayState::handleEvent(const sf::Event& event) {
     if (!player) return;
 
     if (event.type == sf::Event::KeyPressed) {
+        if (event.key.code == sf::Keyboard::Space) {
+            world.placeBomb(*player);
+            return;
+        }
+
         const auto direction = keyToDirection(event.key.code);
         if (direction != bomberman::logic::Direction::None) {
             movementDirection = direction;

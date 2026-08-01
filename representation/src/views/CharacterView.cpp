@@ -30,60 +30,6 @@ namespace {
         return {idle, walk};
     }
 }
-    /*
-     sf::IntRect kIdleUp{20, 97, kFrameWidth, kFrameHeight};
-     sf::IntRect kIdleDown{20, 47, kFrameWidth, kFrameHeight};
-     sf::IntRect kIdleLeft{20, 122, kFrameWidth, kFrameHeight};
-     sf::IntRect kIdleRight{20, 72, kFrameWidth, kFrameHeight};
-
-     std::array<sf::IntRect, 4> kWalkUp{{
-        {3, 97, kFrameWidth, kFrameHeight},
-        {20, 97, kFrameWidth, kFrameHeight},
-        {37, 97, kFrameWidth, kFrameHeight},
-        {20, 97, kFrameWidth, kFrameHeight},
-    }};
-     std::array<sf::IntRect, 4> kWalkDown{{
-        {3, 47, kFrameWidth, kFrameHeight},
-        {20, 47, kFrameWidth, kFrameHeight},
-        {37, 47, kFrameWidth, kFrameHeight},
-        {20, 47, kFrameWidth, kFrameHeight},
-    }};
-     std::array<sf::IntRect, 4> kWalkLeft{{
-        {3, 122, kFrameWidth, kFrameHeight},
-        {20, 122, kFrameWidth, kFrameHeight},
-        {37, 122, kFrameWidth, kFrameHeight},
-        {20, 122, kFrameWidth, kFrameHeight},
-    }};
-     std::array<sf::IntRect, 4> kWalkRight{{
-        {3, 72, kFrameWidth, kFrameHeight},
-        {20, 72, kFrameWidth, kFrameHeight},
-        {37, 72, kFrameWidth, kFrameHeight},
-        {20, 72, kFrameWidth, kFrameHeight},
-    }};
-
-    const sf::IntRect& idleFrame(bomberman::logic::Direction facing) {
-        switch (facing) {
-            case bomberman::logic::Direction::Up: return kIdleUp;
-            case bomberman::logic::Direction::Down: return kIdleDown;
-            case bomberman::logic::Direction::Left: return kIdleLeft;
-            case bomberman::logic::Direction::Right: return kIdleRight;
-            case bomberman::logic::Direction::None: return kIdleDown;
-        }
-        return kIdleDown;
-    }
-
-    const std::array<sf::IntRect, 4>& walkFrames(bomberman::logic::Direction facing) {
-        switch (facing) {
-            case bomberman::logic::Direction::Up: return kWalkUp;
-            case bomberman::logic::Direction::Down: return kWalkDown;
-            case bomberman::logic::Direction::Left: return kWalkLeft;
-            case bomberman::logic::Direction::Right: return kWalkRight;
-            case bomberman::logic::Direction::None: return kWalkDown;
-        }
-        return kWalkDown;
-    }
-} // namespace
-*/
 
 CharacterAnimationSet makeCharacterAnimationSet(CharacterSpriteVariant variant) {
     switch (variant) {

@@ -31,7 +31,7 @@ public:
     std::shared_ptr<bomberman::logic::Character> createCharacter(
         bomberman::logic::Vector2 position, bool isPlayer) override;
     std::shared_ptr<bomberman::logic::Bomb> createBomb(
-        bomberman::logic::Vector2 position, bomberman::logic::Character& owner) override;
+        bomberman::logic::Vector2 position, std::shared_ptr<bomberman::logic::Character> owner) override;
     std::shared_ptr<bomberman::logic::Wall> createWall(
         bomberman::logic::Vector2 position, bool destructible) override;
     std::shared_ptr<bomberman::logic::PowerUp> createPowerUp(
@@ -42,6 +42,7 @@ public:
 private:
     std::vector<std::shared_ptr<EntityView>> views;
     std::shared_ptr<sf::Texture> characterTexture;
+    std::shared_ptr<sf::Texture> arenaTexture;
     std::size_t nextBotVariant{0}; // Used to cycle through Bot1, Bot2, Bot3 for each new Bot created.
 };
 

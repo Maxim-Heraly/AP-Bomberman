@@ -31,7 +31,7 @@ public:
 private:
     std::weak_ptr<Character> owner;
     int radius;
-    float fuseRemaining{2.f}; // seconds - TODO: tune, or read from a shared config/constants file.
+    float fuseRemaining{3.f};
     bool exploded{false};
 };
 

@@ -1,16 +1,24 @@
 #include "logic/entities/Bomb.hpp"
+#include "logic/entities/Character.hpp"
 
 namespace bomberman::logic {
 
-Bomb::Bomb(Vector2 position, Vector2 size, std::weak_ptr<Character> owner, int radius)
-    : EntityModel(position, size), owner(std::move(owner)), radius(radius) {}
+    Bomb::Bomb(Vector2 position, Vector2 size, std::weak_ptr<Character> owner, int radius)
+        : EntityModel(position, size), owner(std::move(owner)), radius(radius) {}
 
-void Bomb::update(float deltaTime) {
-    // TODO: count fuseRemaining_ down by deltaTime. Once it reaches <= 0:
-    // set exploded_ = true, markDead(), notify(EventType::BombExploded).
-    // The actual cross-shaped destruction happens in World::explode(),
-    // triggered from World::update() once it sees hasExploded() == true.
-    (void)deltaTime;
-}
+    void Bomb::update(float deltaTime) {
+        if (exploded || !alive) return;
+
+        fuseRemaining -= deltaTime;
+        if (fuseRemaining > 0.f) return;
+
+        exploded = true;
+        if (auto ownerPtr = owner.lock()) {
+            ownerPtr->onBombExploded();
+        }
+
+        markDead();
+        notify(EventType::BombExploded);
+    }
 
 } // namespace bomberman::logic

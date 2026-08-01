@@ -3,6 +3,7 @@
 #include "logic/entities/Character.hpp"
 #include "logic/entities/PowerUp.hpp"
 #include "logic/entities/Wall.hpp"
+#include <algorithm>
 
 namespace bomberman::logic {
 
@@ -26,12 +27,54 @@ void World::update(float deltaTime) {
     for (const auto& entity : entities) {
         entity->update(deltaTime);
     }
+
+    std::vector<std::shared_ptr<Bomb>> explodedBombs;
+    explodedBombs.reserve(entities.size());
+    for (const auto& entity : entities) {
+        auto bomb = std::dynamic_pointer_cast<Bomb>(entity);
+        if (bomb && bomb->hasExploded()) {
+            explodedBombs.push_back(bomb);
+        }
+    }
+
+    for (const auto& bomb : explodedBombs) {
+        explode(*bomb);
+    }
+
+    entities.erase(
+        std::remove_if(entities.begin(), entities.end(),
+            [](const std::shared_ptr<EntityModel>& entity) { return !entity->isAlive(); }),
+        entities.end());
 }
 
 void World::placeBomb(Character& owner) {
-    // TODO: if (owner.canPlaceBomb()) factory_->createBomb(owner position, owner);
-    // and store the resulting shared_ptr<Bomb> in entities_.
-    (void)owner;
+    if (!owner.tryPlaceBomb()) return;
+
+    std::shared_ptr<Character> ownerPtr;
+    if (player && player.get() == &owner) {
+        ownerPtr = player;
+    } else {
+        for (const auto& entity : entities) {
+            auto character = std::dynamic_pointer_cast<Character>(entity);
+            if (character && character.get() == &owner) {
+                ownerPtr = std::move(character);
+                break;
+            }
+        }
+    }
+
+    if (!ownerPtr) {
+        owner.onBombExploded();
+        return;
+    }
+
+    auto bomb = factory->createBomb(owner.getPosition(), ownerPtr);
+    if (!bomb) {
+        owner.onBombExploded();
+        return;
+    }
+
+    entities.push_back(bomb);
 }
 
 void World::generateArena() {

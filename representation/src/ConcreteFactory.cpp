@@ -20,6 +20,10 @@ ConcreteFactory::ConcreteFactory() {
     if (!characterTexture->loadFromFile(ASSET_DIR "/spritesheets/character_sprites.png")) {
         throw std::runtime_error("Failed to load character texture");
     }
+    arenaTexture = std::make_shared<sf::Texture>();
+    if (!arenaTexture->loadFromFile(ASSET_DIR "/spritesheets/battle_stage_sprites.png")) {
+        throw std::runtime_error("Failed to load arena texture");
+    }
 }
 
 std::shared_ptr<Character> ConcreteFactory::createCharacter(Vector2 position, bool isPlayer) {
@@ -49,12 +53,18 @@ std::shared_ptr<Character> ConcreteFactory::createCharacter(Vector2 position, bo
     return model;
 }
 
-std::shared_ptr<Bomb> ConcreteFactory::createBomb(Vector2 position, Character& owner) {
+std::shared_ptr<Bomb> ConcreteFactory::createBomb(Vector2 position, std::shared_ptr<Character> owner) {
     // TODO: same recipe, using owner.getBombRadius() for the Bomb's radius
-    // and a BombView.
-    (void)position;
-    (void)owner;
-    return nullptr;
+    if (!owner) return nullptr;
+
+    Vector2 bombSize{0.07f, 0.07f};
+    auto model = std::make_shared<Bomb>(position, bombSize, owner, owner->getBombRadius());
+
+    auto view = std::make_shared<BombView>(model, arenaTexture, makeBombAnimationSet());
+    model->attach(view);
+    views.push_back(view);
+
+    return model;
 }
 
 std::shared_ptr<Wall> ConcreteFactory::createWall(Vector2 position, bool destructible) {
