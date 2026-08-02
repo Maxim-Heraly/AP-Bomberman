@@ -4,7 +4,7 @@
 
 namespace bomberman::representation {
 
-Game::Game() : window(sf::VideoMode(800, 800), "Bomberman", sf::Style::Titlebar | sf::Style::Close) {
+Game::Game() : window(sf::VideoMode(720, 624), "Bomberman", sf::Style::Titlebar | sf::Style::Close) {
     window.setFramerateLimit(60);
     stateManager.changeState(std::make_unique<MenuState>(stateManager));
 }

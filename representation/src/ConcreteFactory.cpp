@@ -69,9 +69,13 @@ std::shared_ptr<Bomb> ConcreteFactory::createBomb(Vector2 position, std::shared_
 
 std::shared_ptr<Wall> ConcreteFactory::createWall(Vector2 position, bool destructible) {
     // TODO: same recipe, using a WallView.
-    (void)position;
-    (void)destructible;
-    return nullptr;
+    Vector2 wallSize{0.1f, 0.1f};
+    auto model = std::make_shared<Wall>(position, wallSize, destructible);
+    auto view = std::make_shared<WallView>(model, arenaTexture, makeWallAnimationSet(destructible ? WallSpriteVariant::Destructible : WallSpriteVariant::Indestructible));
+    model->attach(view);
+    views.push_back(view);
+
+    return model;
 }
 
 std::shared_ptr<PowerUp> ConcreteFactory::createPowerUp(Vector2 position, PowerUpType type) {

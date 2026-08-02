@@ -1,17 +1,75 @@
 #include "representation/views/WallView.hpp"
+#include "logic/utils/Stopwatch.hpp"
 
 namespace bomberman::representation {
 
-void WallView::onNotify(const bomberman::logic::Subject& source, bomberman::logic::EventType event) {
-    // TODO: react to BlockDestroyed (e.g. a short crumble animation, then markedForRemoval_ = true).
-    (void)source;
-    (void)event;
-}
+    using bomberman::logic::EventType;
+    using bomberman::logic::Stopwatch;
+    using bomberman::logic::Subject;
+    using bomberman::logic::Vector2;
+    using bomberman::logic::Wall;
 
-void WallView::draw(sf::RenderWindow& window, const Camera& camera) {
-    // TODO: sprite_.setPosition(...) via camera.worldToScreen(model_->getPosition()); window.draw(sprite_);
-    (void)window;
-    (void)camera;
-}
+    namespace {
+        constexpr int kWallFrameWidth = 16;
+        constexpr int kWallFrameHeight = 16;
+
+        sf::IntRect rect(int left, int top) {
+            return {left, top, kWallFrameWidth, kWallFrameHeight};
+        }
+
+        WallAnimationSet makeSet(const std::array<sf::IntRect, 1>& idle, const std::array<sf::IntRect, 6>& breaking) {
+            return {idle, breaking};
+        }
+    }
+
+    WallAnimationSet makeWallAnimationSet(WallSpriteVariant variant) {
+        switch (variant) {
+            case WallSpriteVariant::Indestructible:
+                return makeSet({rect(18, 15)}, {});
+
+            case WallSpriteVariant::Destructible:
+                return makeSet(
+                    {rect(35, 15)},
+                    {rect(1, 117), rect(18, 117), rect(35, 117), rect(52, 117), rect(69, 117), rect(86, 117)}
+                );
+        }
+        return makeSet({rect(18, 15)}, {});
+    }
+
+    WallView::WallView(std::shared_ptr<const Wall> model,
+                       std::shared_ptr<sf::Texture> texture,
+                       WallAnimationSet animationSet)
+        : model(std::move(model)), texture(std::move(texture)), animationSet(animationSet) {
+        sprite.setTexture(*this->texture);
+    }
+
+    void WallView::onNotify(const Subject& /*source*/, EventType event) {
+        if (event == EventType::BlockDestroyed) {
+            breaking = true;
+        }
+    }
+
+    void WallView::draw(sf::RenderWindow& window, const Camera& camera) {
+        if (breaking) {
+            breakTimer += Stopwatch::getInstance().getDeltaTime();
+            if (breakTimer >= kBreakDuration) {
+                markedForRemoval = true;
+                return;
+            }
+        }
+
+        const Vector2 screenPos = camera.worldToScreen(model->getPosition());
+        Vector2 screenSize = camera.worldSizeToScreen(model->getSize());
+        if (breaking) {
+            screenSize = screenSize * (1.f - breakTimer / kBreakDuration); // Crumble away.
+        }
+
+        sprite.setTexture(*this->texture);
+        sprite.setTextureRect(breaking ? animationSet.breaking[std::min(static_cast<std::size_t>(breakTimer / (kBreakDuration / animationSet.breaking.size())), animationSet.breaking.size() - 1)] : animationSet.idle[0]);
+        sprite.setScale(screenSize.x / kWallFrameWidth, screenSize.y / kWallFrameHeight);
+        sprite.setOrigin(kWallFrameWidth * 0.5f, kWallFrameHeight * 0.5f);
+        sprite.setPosition(screenPos.x, screenPos.y);
+        window.draw(sprite);
+    }
 
 } // namespace bomberman::representation

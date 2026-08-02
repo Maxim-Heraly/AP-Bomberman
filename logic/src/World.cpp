@@ -3,7 +3,10 @@
 #include "logic/entities/Character.hpp"
 #include "logic/entities/PowerUp.hpp"
 #include "logic/entities/Wall.hpp"
+#include "logic/utils/Random.hpp"
 #include <algorithm>
+#include <fstream>
+#include <sstream>
 
 namespace bomberman::logic {
 
@@ -11,10 +14,6 @@ World::World(std::shared_ptr<AbstractFactory> factory) : factory(std::move(facto
 
 void World::initialize() {
     generateArena();
-    if (!player) {
-        player = factory->createCharacter({-0.9f, -0.9f}, true); // Player top-left
-        entities.push_back(player);
-    }
 }
 void World::update(float deltaTime) {
     // TODO, suggested order:
@@ -78,12 +77,61 @@ void World::placeBomb(Character& owner) {
 }
 
 void World::generateArena() {
-    // TODO: see section 2.1 "Game startup & Initialization" - alternating
-    // indestructible blocks (fixed grid positions) filled with destructible
-    // blocks (low chance of leaving air instead), Player spawned top-left,
-    // one Bot per remaining corner. Use factory_->createWall(...) /
-    // factory_->createCharacter(...) and Random::getInstance() for the
-    // destructible-vs-air roll. Remember to keep the four spawn corners clear.
+    std::ifstream file("../../assets/arenas/normal_arena.txt");
+    if (!file.is_open()) {
+        throw std::runtime_error("Failed to load arena.txt");
+    }
+
+    std::string line;
+    float yPos = -0.95f;
+    const float tileSize = 0.1f;
+
+    while (std::getline(file, line)) {
+        float xPos = -0.95f;
+
+        for (char c : line) {
+            if (c == ' ') {
+                xPos += tileSize;
+                continue;
+            }
+
+            Vector2 pos{xPos, yPos};
+            Vector2 size{tileSize * 0.9f, tileSize * 0.9f};
+
+            switch (c) {
+                case 'W': {
+                    auto wall = factory->createWall(pos, false);
+                    if (wall) entities.push_back(wall);
+                    break;
+                }
+                case 'D': {
+                    if (Random::getInstance().chance(0.75f)) {
+                        auto wall = factory->createWall(pos, true);
+                        if (wall) entities.push_back(wall);
+                    }
+                    break;
+                }
+                case 'P': {
+                    if (!player) {
+                        player = factory->createCharacter(pos, true);
+                        if (player) entities.push_back(player);
+                    }
+                    break;
+                }
+                case 'B': {
+                    auto bot = factory->createCharacter(pos, false);
+                    if (bot) entities.push_back(bot);
+                    break;
+                }
+                default:
+                    break;
+            }
+
+            xPos += tileSize;
+        }
+
+        yPos += tileSize;
+    }
 }
 
 void World::handleCollisions() {
