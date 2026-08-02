@@ -51,46 +51,46 @@ CharacterAnimationSet makeCharacterAnimationSet(CharacterSpriteVariant variant) 
         case CharacterSpriteVariant::Bot1:
             return makeSet(
             Frames4{
-                rect(20,97),
-                rect(20, 47),
-                rect(20, 122),
-                rect(20, 72)
+                rect(213,97),
+                rect(213, 47),
+                rect(213, 122),
+                rect(213, 72)
             },
             WalkSet{
-                Frames4{rect(3, 97), rect(20, 97), rect(37, 97), rect(20, 97)},
-                Frames4{rect(3, 47), rect(20, 47), rect(37, 47), rect(20, 47)},
-                Frames4{rect(3, 122), rect(20, 122), rect(37, 122), rect(20, 122)},
-                Frames4{rect(3, 72), rect(20, 72), rect(37, 72), rect(20, 72)}
+                Frames4{rect(196, 97), rect(213, 97), rect(230, 97), rect(213, 97)},
+                Frames4{rect(196, 47), rect(213, 47), rect(230, 47), rect(213, 47)},
+                Frames4{rect(196, 122), rect(213, 122), rect(230, 122), rect(213, 122)},
+                Frames4{rect(196, 72), rect(213, 72), rect(230, 72), rect(213, 72)}
             });
 
         case CharacterSpriteVariant::Bot2:
             return makeSet(
             Frames4{
-                rect(20,97),
-                rect(20, 47),
-                rect(20, 122),
-                rect(20, 72)
+                rect(20,355),
+                rect(20, 305),
+                rect(20, 380),
+                rect(20, 330)
             },
             WalkSet{
-                Frames4{rect(3, 97), rect(20, 97), rect(37, 97), rect(20, 97)},
-                Frames4{rect(3, 47), rect(20, 47), rect(37, 47), rect(20, 47)},
-                Frames4{rect(3, 122), rect(20, 122), rect(37, 122), rect(20, 122)},
-                Frames4{rect(3, 72), rect(20, 72), rect(37, 72), rect(20, 72)}
+                Frames4{rect(3, 355), rect(20, 355), rect(37, 355), rect(20, 355)},
+                Frames4{rect(3, 305), rect(20, 305), rect(37, 305), rect(20, 305)},
+                Frames4{rect(3, 380), rect(20, 380), rect(37, 380), rect(20, 380)},
+                Frames4{rect(3, 330), rect(20, 330), rect(37, 330), rect(20, 330)}
             });
 
         case CharacterSpriteVariant::Bot3:
             return makeSet(
             Frames4{
-                rect(20,97),
-                rect(20, 47),
-                rect(20, 122),
-                rect(20, 72)
+                rect(213,355),
+                rect(213, 305),
+                rect(213, 380),
+                rect(213, 330)
             },
             WalkSet{
-                Frames4{rect(3, 97), rect(20, 97), rect(37, 97), rect(20, 97)},
-                Frames4{rect(3, 47), rect(20, 47), rect(37, 47), rect(20, 47)},
-                Frames4{rect(3, 122), rect(20, 122), rect(37, 122), rect(20, 122)},
-                Frames4{rect(3, 72), rect(20, 72), rect(37, 72), rect(20, 72)}
+                Frames4{rect(196, 355), rect(213, 355), rect(230, 355), rect(213, 355)},
+                Frames4{rect(196, 305), rect(213, 305), rect(230, 305), rect(213, 305)},
+                Frames4{rect(196, 380), rect(213, 380), rect(230, 380), rect(213, 380)},
+                Frames4{rect(196, 330), rect(213, 330), rect(230, 330), rect(213, 330)}
             });
     ;}
 
@@ -140,7 +140,6 @@ void CharacterView::update(float deltaTime) {
 }
 
 void CharacterView::draw(sf::RenderWindow& window, const Camera& camera) {
-    // TODO: sprite_.setPosition(...) via camera.worldToScreen(model_->getPosition()); window.draw(sprite_);
     if (!model || markedForRemoval) return;
 
     const auto screenPos = camera.worldToScreen(model->getPosition());

@@ -60,9 +60,6 @@ namespace bomberman::representation {
 
         const Vector2 screenPos = camera.worldToScreen(model->getPosition());
         Vector2 screenSize = camera.worldSizeToScreen(model->getSize());
-        if (breaking) {
-            screenSize = screenSize * (1.f - breakTimer / kBreakDuration); // Crumble away.
-        }
 
         sprite.setTexture(*this->texture);
         sprite.setTextureRect(breaking ? animationSet.breaking[std::min(static_cast<std::size_t>(breakTimer / (kBreakDuration / animationSet.breaking.size())), animationSet.breaking.size() - 1)] : animationSet.idle[0]);

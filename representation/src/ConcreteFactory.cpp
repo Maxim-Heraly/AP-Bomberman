@@ -27,10 +27,6 @@ ConcreteFactory::ConcreteFactory() {
 }
 
 std::shared_ptr<Character> ConcreteFactory::createCharacter(Vector2 position, bool isPlayer) {
-    // TODO: pick a fixed size (e.g. {0.08f, 0.08f}), construct a Player or a
-    // Bot depending on isPlayer, construct a matching CharacterView,
-    // model->attach(view), store the view in views_, return the model. See
-    // the ConcreteFactory.hpp doc comment for the full 5-step recipe.
     Vector2 characterSize{0.08f, 0.08f};
     std::shared_ptr<Character> model;
     if (isPlayer) {
@@ -54,7 +50,6 @@ std::shared_ptr<Character> ConcreteFactory::createCharacter(Vector2 position, bo
 }
 
 std::shared_ptr<Bomb> ConcreteFactory::createBomb(Vector2 position, std::shared_ptr<Character> owner) {
-    // TODO: same recipe, using owner.getBombRadius() for the Bomb's radius
     if (!owner) return nullptr;
 
     Vector2 bombSize{0.07f, 0.07f};
@@ -68,7 +63,6 @@ std::shared_ptr<Bomb> ConcreteFactory::createBomb(Vector2 position, std::shared_
 }
 
 std::shared_ptr<Wall> ConcreteFactory::createWall(Vector2 position, bool destructible) {
-    // TODO: same recipe, using a WallView.
     Vector2 wallSize{0.1f, 0.1f};
     auto model = std::make_shared<Wall>(position, wallSize, destructible);
     auto view = std::make_shared<WallView>(model, arenaTexture, makeWallAnimationSet(destructible ? WallSpriteVariant::Destructible : WallSpriteVariant::Indestructible));
