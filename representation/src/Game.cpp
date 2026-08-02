@@ -4,7 +4,7 @@
 
 namespace bomberman::representation {
 
-Game::Game() : window(sf::VideoMode(720, 624), "Bomberman", sf::Style::Titlebar | sf::Style::Close) {
+Game::Game() : window(sf::VideoMode(900, 690), "Bomberman", sf::Style::Titlebar | sf::Style::Close) {
     window.setFramerateLimit(60);
     stateManager.changeState(std::make_unique<MenuState>(stateManager));
 }
@@ -34,7 +34,7 @@ void Game::update(float deltaTime) {
 }
 
 void Game::render() {
-    window.clear(sf::Color(30, 30, 35)); // A dark neutral background behind the arena.
+    window.clear(sf::Color(34, 68, 48)); // A dark neutral background behind the arena.
     stateManager.render(window);
     window.display();}
 

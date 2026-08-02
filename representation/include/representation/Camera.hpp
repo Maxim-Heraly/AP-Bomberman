@@ -27,8 +27,8 @@ public:
 
     /// Maps world [-1, 1] -> pixels [0, windowWidth_] / [0, windowHeight_].
     bomberman::logic::Vector2 worldToScreen(const bomberman::logic::Vector2& world) const {
-        const float px = (world.x + 1.f) * 0.5f * static_cast<float>(windowWidth);
-        const float py = (world.y + 1.f) * 0.5f * static_cast<float>(windowHeight);
+        const float px = (world.x + 1.f) * 0.665f * static_cast<float>(windowWidth);
+        const float py = (world.y + 1.f) * 0.665f * 800;
         return {px, py};
     }
 
@@ -36,8 +36,8 @@ public:
     /// on-screen width/height of a sprite, so it scales correctly if the
     /// window is resized.
     bomberman::logic::Vector2 worldSizeToScreen(const bomberman::logic::Vector2& size) const {
-        return {size.x * 0.5f * static_cast<float>(windowWidth),
-                size.y * 0.5f * static_cast<float>(windowHeight)};
+        return {size.x * 0.665f * static_cast<float>(windowWidth),
+                size.y * 0.665f * 800};
     }
 
 private:
