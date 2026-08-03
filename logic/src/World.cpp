@@ -7,6 +7,8 @@
 #include <algorithm>
 #include <fstream>
 #include <sstream>
+#include <functional>
+#include <unordered_set>
 
 namespace bomberman::logic {
 
@@ -18,6 +20,33 @@ namespace {
         const auto owner = bomb->getOwner().lock();
         return owner && owner == character;
     }
+
+    std::size_t dirIndex(Direction direction) {
+        switch (direction) {
+            case Direction::Up: return 0;
+            case Direction::Down: return 1;
+            case Direction::Left: return 2;
+            case Direction::Right: return 3;
+            case Direction::None: break;
+        }
+        return 1;
+    }
+
+    Vector2 stepOffset(Direction direction, float step) {
+        switch (direction) {
+            case Direction::Up: return {0.f, -step};
+            case Direction::Down: return {0.f, step};
+            case Direction::Left: return {-step, 0.f};
+            case Direction::Right: return {step, 0.f};
+            case Direction::None: break;
+        }
+        return {0.f, 0.f};
+    }
+
+    struct BlastTile : EntityModel {
+        BlastTile(Vector2 position, Vector2 size) : EntityModel(position, size) {}
+        void update(float /*deltaTime*/) override {}
+    };
 }
 
 World::World(std::shared_ptr<AbstractFactory> factory) : factory(std::move(factory)) {}
@@ -206,7 +235,75 @@ void World::explode(Bomb& bomb) {
     // Wall found (maybe spawn a PowerUp there via Random::chance()); trigger
     // chain reactions on other Bombs found along the way
     // (Bomb::detonateEarly()); kill any Character found in the blast.
-    (void)bomb;
+    auto start = std::find_if(entities.begin(), entities.end(),
+        [&bomb](const std::shared_ptr<EntityModel>& entity) {
+            auto candidate = std::dynamic_pointer_cast<Bomb>(entity);
+            return candidate && candidate.get() == &bomb;
+        });
+
+    if (start == entities.end()) return;
+
+    auto startBomb = std::dynamic_pointer_cast<Bomb>(*start);
+    if (!startBomb) return;
+
+    std::unordered_set<const Bomb*> processedBombs;
+
+    std::function<void(const std::shared_ptr<Bomb>&)> explodeBomb =
+        [&](const std::shared_ptr<Bomb>& currentBomb) {
+            if (!currentBomb || !processedBombs.insert(currentBomb.get()).second) return;
+
+            Bomb::BlastProfile profile{};
+            const Vector2 center = currentBomb->getPosition();
+            const Vector2 stepSize = currentBomb->getSize();
+            const int radius = std::max(1, currentBomb->getRadius());
+
+            for (Direction direction : {Direction::Up, Direction::Down, Direction::Left, Direction::Right}) {
+                const std::size_t index = dirIndex(direction);
+                int visibleReach = 0;
+                bool hasNaturalEnd = false;
+
+                for (int step = 1; step <= radius; ++step) {
+                    const Vector2 pos = center + stepOffset(direction, stepSize.x * static_cast<float>(step));
+                    BlastTile blastTile{pos, stepSize};
+
+                    bool blockedByWall = false;
+
+                    for (const auto& entity : entities) {
+                        if (!entity || entity.get() == currentBomb.get()) continue;
+                        if (!entity->intersects(blastTile)) continue;
+
+                        if (auto wall = std::dynamic_pointer_cast<Wall>(entity)) {
+                            if (wall->isDestructible()) {
+                                wall->destroy();
+                            }
+                            blockedByWall = true;
+                            break;
+                        }
+                        if (auto otherBomb = std::dynamic_pointer_cast<Bomb>(entity)) {
+                            if (!otherBomb->hasExploded()) {
+                                otherBomb->detonateEarly();
+                                otherBomb->update(0.f);
+                            }
+                            explodeBomb(otherBomb);
+                            continue;
+                        }
+                        if (auto character = std::dynamic_pointer_cast<Character>(entity)) {
+                            character->die();
+                            continue;
+                        }
+                    }
+                    if (blockedByWall) {
+                        break;
+                    }
+                    visibleReach = step;
+                    hasNaturalEnd = (step == radius);
+                }
+                profile.reach[index] = visibleReach;
+                profile.hasEnd[index] = hasNaturalEnd && visibleReach > 0;
+            }
+            currentBomb->setBlastProfile(profile);
+    };
+    explodeBomb(startBomb);
 }
 
 } // namespace bomberman::logic

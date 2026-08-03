@@ -2,6 +2,7 @@
 
 #include "logic/entities/EntityModel.hpp"
 #include <memory>
+#include <array>
 
 namespace bomberman::logic {
 
@@ -16,18 +17,24 @@ class Character;
  */
 class Bomb : public EntityModel {
 public:
+    struct BlastProfile {
+        std::array<int, 4> reach{0, 0, 0, 0}; // Up, Down, Left, Right
+        std::array<bool, 4> hasEnd{false, false, false, false};
+    };
     Bomb(Vector2 position, Vector2 size, std::weak_ptr<Character> owner, int radius);
 
-    void update(float deltaTime) override; // TODO: fuse countdown
+    void update(float deltaTime) override;
 
-    int getRadius() const { return radius; }
-    bool hasExploded() const { return exploded; }
-    std::weak_ptr<Character> getOwner() const { return owner; }
-    bool canOwnerPassThrough() const { return ownerCanPassThrough; }
+    [[nodiscard]] int getRadius() const { return radius; }
+    [[nodiscard]] bool hasExploded() const { return exploded; }
+    [[nodiscard]] std::weak_ptr<Character> getOwner() const { return owner; }
+
+    [[nodiscard]] bool canOwnerPassThrough() const { return ownerCanPassThrough; }
     void disableOwnerPassThrough() { ownerCanPassThrough = false; }
 
-    /// TODO: World calls this when a chain-reaction explosion reaches this
-    /// bomb before its own fuse would have run out.
+    const BlastProfile& getBlastProfile() const { return blastProfile; }
+    void setBlastProfile(BlastProfile profile) { blastProfile = profile; }
+
     void detonateEarly() { fuseRemaining = 0.f; }
 
 private:
@@ -36,6 +43,7 @@ private:
     float fuseRemaining{3.f};
     bool exploded{false};
     bool ownerCanPassThrough{true};
+    BlastProfile blastProfile;
 };
 
 } // namespace bomberman::logic

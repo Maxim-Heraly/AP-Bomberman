@@ -41,6 +41,12 @@ public:
 
     void revertToPreviousPosition() { position = previousPosition; }
 
+    void die() {
+        if (!alive) return;
+        markDead();
+        notify(EventType::Died);
+    }
+
     // --- Power-up hooks -------------------------------------------------
     // TODO: call these from FirePowerUp/BombPowerUp/SkatesPowerUp::applyEffect().
     void increaseBombRadius(int amount) { bombRadius += amount; }

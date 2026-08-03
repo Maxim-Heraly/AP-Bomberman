@@ -19,6 +19,28 @@ namespace bomberman::representation {
         sf::IntRect explosionRect(int left, int top) {
             return {left, top, kExplosionFrameWidth, kExplosionFrameHeight};
         }
+
+        std::size_t dirIndex(bomberman::logic::Direction direction) {
+            switch (direction) {
+                case bomberman::logic::Direction::Up: return 0;
+                case bomberman::logic::Direction::Down: return 1;
+                case bomberman::logic::Direction::Left: return 2;
+                case bomberman::logic::Direction::Right: return 3;
+                case bomberman::logic::Direction::None: break;
+            }
+            return 1;
+        }
+
+        bomberman::logic::Vector2 stepOffset(bomberman::logic::Direction direction, float step) {
+            switch (direction) {
+                case bomberman::logic::Direction::Up: return {0.f, -step};
+                case bomberman::logic::Direction::Down: return {0.f, step};
+                case bomberman::logic::Direction::Left: return {-step, 0.f};
+                case bomberman::logic::Direction::Right: return {step, 0.f};
+                case bomberman::logic::Direction::None: break;
+            }
+            return {0.f, 0.f};
+        }
     } // namespace
 
     BombAnimationSet makeBombAnimationSet() {
@@ -136,27 +158,30 @@ namespace bomberman::representation {
         }
 
         // Explosion phase
+        const auto& blast = model->getBlastProfile();
         const auto frameIdx = std::min(explosionFrameIndex, animations.center.size() - 1);
+
         drawFrame(window, camera, animations.center[frameIdx], center);
 
-        const int radius = std::max(1, model->getRadius());
-        const auto tile = model->getSize();
+        const auto drawDirection = [&](bomberman::logic::Direction direction,
+                                       const std::array<sf::IntRect, 9>& bodyFrames,
+                                       const std::array<sf::IntRect, 9>& endFrames) {
+            const std::size_t idx = dirIndex(direction);
+            const int reach = blast.reach[idx];
+            if (reach <= 0) return;
 
-        for (int step = 1; step <= radius; ++step) {
-            const float dx = tile.x * static_cast<float>(step);
-            const float dy = tile.y * static_cast<float>(step);
-            const bool isEnd = (step == radius);
+            for (int step = 1; step <= reach; ++step) {
+                const bool isEnd = blast.hasEnd[idx] && step == reach;
+                const sf::IntRect& frame = isEnd ? endFrames[frameIdx] : bodyFrames[frameIdx];
+                const float offset = model->getSize().x * static_cast<float>(step);
+                drawFrame(window, camera, frame, center + stepOffset(direction, offset));
+            }
+        };
 
-            const sf::IntRect& upFrame = isEnd ? animations.endUp[frameIdx] : animations.bodyVertical[frameIdx];
-            const sf::IntRect& downFrame = isEnd ? animations.endDown[frameIdx] : animations.bodyVertical[frameIdx];
-            const sf::IntRect& leftFrame = isEnd ? animations.endLeft[frameIdx] : animations.bodyHorizontal[frameIdx];
-            const sf::IntRect& rightFrame = isEnd ? animations.endRight[frameIdx] : animations.bodyHorizontal[frameIdx];
-
-            drawFrame(window, camera, upFrame, {center.x, center.y - dy});
-            drawFrame(window, camera, downFrame, {center.x, center.y + dy});
-            drawFrame(window, camera, leftFrame, {center.x - dx, center.y});
-            drawFrame(window, camera, rightFrame, {center.x + dx, center.y});
-        }
+        drawDirection(bomberman::logic::Direction::Up, animations.bodyVertical, animations.endUp);
+        drawDirection(bomberman::logic::Direction::Down, animations.bodyVertical, animations.endDown);
+        drawDirection(bomberman::logic::Direction::Left, animations.bodyHorizontal, animations.endLeft);
+        drawDirection(bomberman::logic::Direction::Right, animations.bodyHorizontal, animations.endRight);
     }
 
 } // namespace bomberman::representation

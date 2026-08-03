@@ -1,6 +1,7 @@
 #pragma once
 
 #include "logic/entities/Bomb.hpp"
+#include "logic/utils/Direction.hpp"
 #include "representation/views/EntityView.hpp"
 #include <memory>
 #include <array>
@@ -33,7 +34,7 @@ public:
              std::shared_ptr<sf::Texture> texture,
              BombAnimationSet animations);
 
-    void onNotify(const bomberman::logic::Subject& source, bomberman::logic::EventType event) override; // TODO
+    void onNotify(const bomberman::logic::Subject& source, bomberman::logic::EventType event) override;
     void draw(sf::RenderWindow& window, const Camera& camera) override;
     void update(float deltaTime) override;
 
