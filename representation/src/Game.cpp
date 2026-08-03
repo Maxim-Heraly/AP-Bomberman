@@ -34,7 +34,7 @@ void Game::update(float deltaTime) {
 }
 
 void Game::render() {
-    window.clear(sf::Color(34, 68, 48)); // A dark neutral background behind the arena.
+    window.clear(sf::Color(27, 61, 42)); // A dark neutral background behind the arena.
     stateManager.render(window);
     window.display();}
 

@@ -23,6 +23,8 @@ public:
     int getRadius() const { return radius; }
     bool hasExploded() const { return exploded; }
     std::weak_ptr<Character> getOwner() const { return owner; }
+    bool canOwnerPassThrough() const { return ownerCanPassThrough; }
+    void disableOwnerPassThrough() { ownerCanPassThrough = false; }
 
     /// TODO: World calls this when a chain-reaction explosion reaches this
     /// bomb before its own fuse would have run out.
@@ -33,6 +35,7 @@ private:
     int radius;
     float fuseRemaining{3.f};
     bool exploded{false};
+    bool ownerCanPassThrough{true};
 };
 
 } // namespace bomberman::logic

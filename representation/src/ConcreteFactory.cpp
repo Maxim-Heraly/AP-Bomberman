@@ -27,7 +27,7 @@ ConcreteFactory::ConcreteFactory() {
 }
 
 std::shared_ptr<Character> ConcreteFactory::createCharacter(Vector2 position, bool isPlayer) {
-    Vector2 characterSize{0.08f, 0.08f};
+    Vector2 characterSize{0.09f, 0.09f};
     std::shared_ptr<Character> model;
     if (isPlayer) {
         model = std::make_shared<Player>(position, characterSize);

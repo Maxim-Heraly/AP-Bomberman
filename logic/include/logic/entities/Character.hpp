@@ -2,6 +2,7 @@
 
 #include "logic/entities/EntityModel.hpp"
 #include "logic/utils/Direction.hpp"
+#include <vector>
 
 namespace bomberman::logic {
 
@@ -16,6 +17,9 @@ namespace bomberman::logic {
  * whether you resolve that by having World revert position_ after the fact,
  * or by querying World before moving.
  */
+
+class Bomb;
+
 class Character : public EntityModel {
 public:
     Character(Vector2 position, Vector2 size);
@@ -34,6 +38,8 @@ public:
     void onBombExploded() {
         if (bombsPlaced > 0) --bombsPlaced;
     }
+
+    void revertToPreviousPosition() { position = previousPosition; }
 
     // --- Power-up hooks -------------------------------------------------
     // TODO: call these from FirePowerUp/BombPowerUp/SkatesPowerUp::applyEffect().
@@ -59,6 +65,7 @@ protected:
     int bombsPlaced{0};       // TODO: increment on placeBomb, decrement when that bomb explodes.
     Direction facing{Direction::Down};
     Direction movementInput{Direction::None};
+    Vector2 previousPosition{};
 };
 
 } // namespace bomberman::logic

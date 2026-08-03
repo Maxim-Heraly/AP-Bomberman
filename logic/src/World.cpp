@@ -10,6 +10,16 @@
 
 namespace bomberman::logic {
 
+namespace {
+    bool isOwnedBombPassThrough( const std::shared_ptr<Character>& character, const std::shared_ptr<Bomb>& bomb) {
+        if (!bomb->canOwnerPassThrough()) {
+            return false;
+        }
+        const auto owner = bomb->getOwner().lock();
+        return owner && owner == character;
+    }
+}
+
 World::World(std::shared_ptr<AbstractFactory> factory) : factory(std::move(factory)) {}
 
 void World::initialize() {
@@ -26,6 +36,8 @@ void World::update(float deltaTime) {
     for (const auto& entity : entities) {
         entity->update(deltaTime);
     }
+
+    handleCollisions();
 
     std::vector<std::shared_ptr<Bomb>> explodedBombs;
     explodedBombs.reserve(entities.size());
@@ -135,10 +147,56 @@ void World::generateArena() {
 }
 
 void World::handleCollisions() {
-    // TODO: see EntityModel::intersects(). Resolve Character-vs-Wall/Bomb
-    // (block movement - e.g. revert the position change from update() on
-    // overlap), Character-vs-PowerUp (call PowerUp::applyEffect), and
-    // Character-vs-live-explosion-tile (kill the Character).
+    std::vector<std::shared_ptr<Character>> characters;
+    std::vector<std::shared_ptr<Wall>> walls;
+    std::vector<std::shared_ptr<Bomb>> bombs;
+
+    for (const auto& entity : entities) {
+        if (auto character = std::dynamic_pointer_cast<Character>(entity)) {
+            characters.push_back(std::move(character));
+        } else if (auto wall = std::dynamic_pointer_cast<Wall>(entity)) {
+            walls.push_back(std::move(wall));
+        } else if (auto bomb = std::dynamic_pointer_cast<Bomb>(entity)) {
+            bombs.push_back(std::move(bomb));
+        }
+    }
+
+    for (const auto& bomb : bombs) {
+        if (!bomb->canOwnerPassThrough()) continue;
+        auto owner = bomb->getOwner().lock();
+        if (!owner) continue;
+        if (!owner->intersects(*bomb)) {
+            bomb->disableOwnerPassThrough();
+        }
+    }
+
+    for (const auto& character : characters) {
+        bool blocked = false;
+
+        for (const auto& wall : walls) {
+            if (character->intersects(*wall)) {
+                blocked = true;
+                break;
+            }
+        }
+
+        if (!blocked) {
+            for (const auto& bomb : bombs) {
+                if (isOwnedBombPassThrough(character, bomb)) {
+                    continue;
+                }
+
+                if (character->intersects(*bomb)) {
+                    blocked = true;
+                    break;
+                }
+            }
+        }
+
+        if (blocked) {
+            character->revertToPreviousPosition();
+        }
+    }
 }
 
 void World::explode(Bomb& bomb) {
