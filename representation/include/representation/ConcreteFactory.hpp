@@ -43,6 +43,7 @@ private:
     std::vector<std::shared_ptr<EntityView>> views;
     std::shared_ptr<sf::Texture> characterTexture;
     std::shared_ptr<sf::Texture> arenaTexture;
+    std::shared_ptr<sf::Texture> powerUpTexture;
     std::size_t nextBotVariant{0}; // Used to cycle through Bot1, Bot2, Bot3 for each new Bot created.
 };
 

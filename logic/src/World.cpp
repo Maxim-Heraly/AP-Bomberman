@@ -275,6 +275,17 @@ void World::explode(Bomb& bomb) {
                         if (auto wall = std::dynamic_pointer_cast<Wall>(entity)) {
                             if (wall->isDestructible()) {
                                 wall->destroy();
+                                if (Random::getInstance().chance(0.33f)) {
+                                    auto chance = Random::getInstance().getInt(1,3);
+                                    PowerUpType type;
+                                    if (chance == 1) { type = PowerUpType::Fire;}
+                                    if (chance == 2) { type = PowerUpType::ExtraBomb; }
+                                    if (chance == 3) { type = PowerUpType::Skates; }
+                                    auto powerUp = factory->createPowerUp(wall->getPosition(), type);
+                                    if (powerUp) {
+                                        entities.push_back(powerUp);
+                                    }
+                                }
                             }
                             blockedByWall = true;
                             break;

@@ -11,6 +11,7 @@
 #include "representation/views/PowerUpView.hpp"
 #include "representation/views/WallView.hpp"
 
+
 namespace bomberman::representation {
 
 using namespace bomberman::logic;
@@ -23,6 +24,10 @@ ConcreteFactory::ConcreteFactory() {
     arenaTexture = std::make_shared<sf::Texture>();
     if (!arenaTexture->loadFromFile(ASSET_DIR "/spritesheets/battle_stage_sprites.png")) {
         throw std::runtime_error("Failed to load arena texture");
+    }
+    powerUpTexture = std::make_shared<sf::Texture>();
+    if (!powerUpTexture->loadFromFile(ASSET_DIR "/spritesheets/powerup_sprites.png")) {
+        throw std::runtime_error("Failed to load power-up texture");
     }
 }
 
@@ -73,10 +78,29 @@ std::shared_ptr<Wall> ConcreteFactory::createWall(Vector2 position, bool destruc
 }
 
 std::shared_ptr<PowerUp> ConcreteFactory::createPowerUp(Vector2 position, PowerUpType type) {
-    // TODO: switch (type) to construct a Fire/Bomb/SkatesPowerUp, then the
-    // same recipe using a PowerUpView.
-    (void)position;
-    (void)type;
+    Vector2 powerUpSize{0.09f, 0.09f};
+
+    if (type == PowerUpType::Fire) {
+        auto model = std::make_shared<FirePowerUp>(position, powerUpSize);
+        auto view = std::make_shared<PowerUpView>(model, powerUpTexture, PowerUpView::getPowerUpAnimation(PowerUpSpriteVariant::Fire));
+        model->attach(view);
+        views.push_back(view);
+        return model;
+    }
+    else if (type == PowerUpType::ExtraBomb) {
+        auto model = std::make_shared<BombPowerUp>(position, powerUpSize);
+        auto view = std::make_shared<PowerUpView>(model, powerUpTexture, PowerUpView::getPowerUpAnimation(PowerUpSpriteVariant::ExtraBomb));
+        model->attach(view);
+        views.push_back(view);
+        return model;
+    }
+    else if (type == PowerUpType::Skates) {
+        auto model = std::make_shared<SkatesPowerUp>(position, powerUpSize);
+        auto view = std::make_shared<PowerUpView>(model, powerUpTexture, PowerUpView::getPowerUpAnimation(PowerUpSpriteVariant::Skates));
+        model->attach(view);
+        views.push_back(view);
+        return model;
+    }
     return nullptr;
 }
 
