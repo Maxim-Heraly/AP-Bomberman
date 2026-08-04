@@ -14,10 +14,12 @@ public:
 
     void update(float /*deltaTime*/) override {} // Power-ups are static until collected.
 
-    /// TODO: World calls this when a Character walks over this PowerUp.
-    /// Implementations should call the relevant Character::increaseXxx(),
-    /// markDead(), and notify(EventType::PowerUpCollected).
     virtual void applyEffect(Character& character) = 0;
+
+    void remove() {
+        markDead();
+        notify(EventType::PowerUpCollected);
+    }
 };
 
 } // namespace bomberman::logic

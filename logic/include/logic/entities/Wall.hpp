@@ -14,11 +14,8 @@ public:
 
     void update(float /*deltaTime*/) override {} // Walls are static, nothing to tick.
 
-    bool isDestructible() const { return destructible; }
+    [[nodiscard]] bool isDestructible() const { return destructible; }
 
-    /// TODO: call from World::explode() when an explosion reaches this Wall
-    /// (only ever called when destructible_ is true). Should markDead() and
-    /// notify(EventType::BlockDestroyed).
     void destroy();
 
 private:

@@ -325,6 +325,10 @@ void World::explode(Bomb& bomb) {
                             character->die();
                             continue;
                         }
+                        if (auto powerUp = std::dynamic_pointer_cast<PowerUp>(entity)) {
+                            powerUp->remove();
+                            continue;
+                        }
                     }
                     if (blockedByWall) {
                         break;

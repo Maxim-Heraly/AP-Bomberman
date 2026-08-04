@@ -32,7 +32,7 @@ public:
     [[nodiscard]] bool canOwnerPassThrough() const { return ownerCanPassThrough; }
     void disableOwnerPassThrough() { ownerCanPassThrough = false; }
 
-    const BlastProfile& getBlastProfile() const { return blastProfile; }
+    [[nodiscard]] const BlastProfile& getBlastProfile() const { return blastProfile; }
     void setBlastProfile(BlastProfile profile) { blastProfile = profile; }
 
     void detonateEarly() { fuseRemaining = 0.f; }

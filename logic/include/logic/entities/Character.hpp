@@ -24,9 +24,9 @@ class Character : public EntityModel {
 public:
     Character(Vector2 position, Vector2 size);
 
-    void update(float deltaTime) override; // TODO
+    void update(float deltaTime) override;
 
-    /// TODO: World should check this before creating a Bomb via the factory.
+
     [[nodiscard]] bool canPlaceBomb() const;
 
     bool tryPlaceBomb() {
@@ -48,7 +48,6 @@ public:
     }
 
     // --- Power-up hooks -------------------------------------------------
-    // TODO: call these from FirePowerUp/BombPowerUp/SkatesPowerUp::applyEffect().
     void increaseBombRadius(int amount) { bombRadius += amount; }
     void increaseMaxBombs(int amount) { maxBombs += amount; }
     void increaseSpeed(float amount) { speed += amount; }
@@ -65,10 +64,10 @@ public:
     void setMovementInput(Direction direction) { movementInput = direction; }
 
 protected:
-    float speed{0.5f};      // TODO: tune starting value - world coords span [-1, 1], so keep this small.
-    int bombRadius{1};       // Starting radius per section 2.1: "one bomb ... with a radius of one".
+    float speed{0.5f};
+    int bombRadius{1};
     int maxBombs{1};
-    int bombsPlaced{0};       // TODO: increment on placeBomb, decrement when that bomb explodes.
+    int bombsPlaced{0};
     Direction facing{Direction::Down};
     Direction movementInput{Direction::None};
     Vector2 previousPosition{};

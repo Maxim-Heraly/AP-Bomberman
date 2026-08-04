@@ -18,10 +18,10 @@ public:
     EntityModel(Vector2 position, Vector2 size) : position(position), size(size) {}
     ~EntityModel() override = default;
 
-    const Vector2& getPosition() const { return position; }
-    const Vector2& getSize() const { return size; }
+    [[nodiscard]] const Vector2& getPosition() const { return position; }
+    [[nodiscard]] const Vector2& getSize() const { return size; }
 
-    bool isAlive() const { return alive; }
+    [[nodiscard]] bool isAlive() const { return alive; }
 
     /// TODO: implement in each subclass - advance this entity's state by one
     /// tick. Call notify(EventType::...) whenever something happens that
@@ -33,7 +33,7 @@ public:
     /// bounding-box overlap test, centered on position_ with size_ as full
     /// width/height. Do NOT use sf::FloatRect here: this class must stay
     /// completely SFML-free (see section 3.1, "Code Design").
-    bool intersects(const EntityModel& other) const;
+    [[nodiscard]] bool intersects(const EntityModel& other) const;
 
 protected:
     Vector2 position;

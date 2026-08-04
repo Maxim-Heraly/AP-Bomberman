@@ -4,12 +4,12 @@
 
 namespace bomberman::logic {
 
-/// Increases the collecting Character's movement speed (section 2.1, "Skates").
+/// Increases the collecting Character's movement speed.
 class SkatesPowerUp : public PowerUp {
 public:
     using PowerUp::PowerUp;
 
-    void applyEffect(Character& character) override; // TODO
+    void applyEffect(Character& character) override;
 };
 
 } // namespace bomberman::logic

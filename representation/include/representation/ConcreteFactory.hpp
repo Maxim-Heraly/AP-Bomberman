@@ -2,6 +2,7 @@
 
 #include "logic/patterns/AbstractFactory.hpp"
 #include "representation/views/EntityView.hpp"
+#include "logic/Score.hpp"
 #include <vector>
 
 namespace bomberman::representation {
@@ -37,10 +38,11 @@ public:
     std::shared_ptr<bomberman::logic::PowerUp> createPowerUp(
         bomberman::logic::Vector2 position, bomberman::logic::PowerUpType type) override;
 
-    const std::vector<std::shared_ptr<EntityView>>& getViews() const { return views; }
+    [[nodiscard]] const std::vector<std::shared_ptr<EntityView>>& getViews() const { return views; }
 
 private:
     std::vector<std::shared_ptr<EntityView>> views;
+    std::shared_ptr<logic::Score> score;
     std::shared_ptr<sf::Texture> characterTexture;
     std::shared_ptr<sf::Texture> arenaTexture;
     std::shared_ptr<sf::Texture> powerUpTexture;
