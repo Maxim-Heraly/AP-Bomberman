@@ -88,6 +88,7 @@ void World::update(float deltaTime) {
 }
 
 void World::placeBomb(Character& owner) {
+    if (!owner.isAlive()) return;
     if (!owner.tryPlaceBomb()) return;
 
     std::shared_ptr<Character> ownerPtr;
@@ -179,6 +180,7 @@ void World::handleCollisions() {
     std::vector<std::shared_ptr<Character>> characters;
     std::vector<std::shared_ptr<Wall>> walls;
     std::vector<std::shared_ptr<Bomb>> bombs;
+    std::vector<std::shared_ptr<PowerUp>> powerUps;
 
     for (const auto& entity : entities) {
         if (auto character = std::dynamic_pointer_cast<Character>(entity)) {
@@ -187,6 +189,9 @@ void World::handleCollisions() {
             walls.push_back(std::move(wall));
         } else if (auto bomb = std::dynamic_pointer_cast<Bomb>(entity)) {
             bombs.push_back(std::move(bomb));
+        }
+        else if (auto powerUp = std::dynamic_pointer_cast<PowerUp>(entity)) {
+            powerUps.push_back(std::move(powerUp));
         }
     }
 
@@ -201,6 +206,12 @@ void World::handleCollisions() {
 
     for (const auto& character : characters) {
         bool blocked = false;
+
+        for (const auto& powerUp : powerUps) {
+            if (character->intersects(*powerUp)) {
+                powerUp->applyEffect(*character);
+            }
+        }
 
         for (const auto& wall : walls) {
             if (character->intersects(*wall)) {

@@ -4,8 +4,9 @@
 namespace bomberman::logic {
 
 void SkatesPowerUp::applyEffect(Character& character) {
-    // TODO: character.increaseSpeed(...); markDead(); notify(EventType::PowerUpCollected);
-    (void)character;
+    character.increaseSpeed(0.1f);
+    markDead();
+    notify(EventType::PowerUpCollected);
 }
 
 } // namespace bomberman::logic

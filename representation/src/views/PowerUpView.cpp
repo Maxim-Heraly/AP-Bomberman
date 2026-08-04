@@ -47,17 +47,18 @@ void PowerUpView::draw(sf::RenderWindow& window, const Camera& camera) {
             currentFrame = (currentFrame + 1) % animationFrames.size();
             animationTimer = 0.0f;
         }
+
+
+        const auto screenPos = camera.worldToScreen(model->getPosition());
+        const auto screenSize = camera.worldSizeToScreen(model->getSize());
+
+        sprite.setTexture(*this->texture);
+        sprite.setTextureRect(animationFrames[currentFrame]);
+        sprite.setScale(screenSize.x / kPowerUpFrameWidth, screenSize.y / kPowerUpFrameHeight);
+        sprite.setOrigin(kPowerUpFrameWidth * 0.5f, kPowerUpFrameHeight * 0.5f);
+        sprite.setPosition(screenPos.x, screenPos.y);
+        window.draw(sprite);
     }
-
-    const auto screenPos = camera.worldToScreen(model->getPosition());
-    const auto screenSize = camera.worldSizeToScreen(model->getSize());
-
-    sprite.setTexture(*this->texture);
-    sprite.setTextureRect(animationFrames[currentFrame]);
-    sprite.setScale(screenSize.x / kPowerUpFrameWidth, screenSize.y / kPowerUpFrameHeight);
-    sprite.setOrigin(kPowerUpFrameWidth * 0.5f, kPowerUpFrameHeight * 0.5f);
-    sprite.setPosition(screenPos.x, screenPos.y);
-    window.draw(sprite);
 }
 
 } // namespace bomberman::representation

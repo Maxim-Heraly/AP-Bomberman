@@ -4,8 +4,9 @@
 namespace bomberman::logic {
 
 void BombPowerUp::applyEffect(Character& character) {
-    // TODO: character.increaseMaxBombs(1); markDead(); notify(EventType::PowerUpCollected);
-    (void)character;
+    character.increaseMaxBombs(1);
+    markDead();
+    notify(EventType::PowerUpCollected);
 }
 
 } // namespace bomberman::logic
