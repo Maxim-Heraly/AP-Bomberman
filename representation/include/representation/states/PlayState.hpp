@@ -36,6 +36,7 @@ private:
     std::shared_ptr<bomberman::logic::Score> score;
     Camera camera;
     bomberman::logic::Direction movementDirection{bomberman::logic::Direction::None};
+    float timer{0.0f};
 };
 
 } // namespace bomberman::representation

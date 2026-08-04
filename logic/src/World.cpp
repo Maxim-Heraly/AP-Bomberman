@@ -85,6 +85,24 @@ void World::update(float deltaTime) {
         std::remove_if(entities.begin(), entities.end(),
             [](const std::shared_ptr<EntityModel>& entity) { return !entity->isAlive(); }),
         entities.end());
+
+    if (!player->isAlive()) {
+        gameOver = true;
+    }
+
+    if (player->isAlive()) {
+        bool anyBotsAlive = false;
+        for (const auto& entity : entities) {
+            auto character = std::dynamic_pointer_cast<Character>(entity);
+            if (character && character.get() != player.get() && character->isAlive()) {
+                anyBotsAlive = true;
+                break;
+            }
+        }
+        if (!anyBotsAlive) {
+            gameOver = true;
+        }
+    }
 }
 
 void World::placeBomb(Character& owner) {
@@ -240,12 +258,6 @@ void World::handleCollisions() {
 }
 
 void World::explode(Bomb& bomb) {
-    // TODO: cross-shaped propagation in the 4 directions from bomb's
-    // position, bomb.getRadius() tiles each way. Stop at the first
-    // indestructible Wall; stop *after* destroying the first destructible
-    // Wall found (maybe spawn a PowerUp there via Random::chance()); trigger
-    // chain reactions on other Bombs found along the way
-    // (Bomb::detonateEarly()); kill any Character found in the blast.
     auto start = std::find_if(entities.begin(), entities.end(),
         [&bomb](const std::shared_ptr<EntityModel>& entity) {
             auto candidate = std::dynamic_pointer_cast<Bomb>(entity);

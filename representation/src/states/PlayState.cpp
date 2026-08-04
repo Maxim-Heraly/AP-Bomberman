@@ -1,6 +1,8 @@
 #include "representation/states/PlayState.hpp"
 #include "representation/states/MenuState.hpp"
 #include "logic/entities/Character.hpp"
+#include "representation/states/StateManager.hpp"
+#include "logic/utils/Stopwatch.hpp"
 
 namespace bomberman::representation {
 
@@ -11,10 +13,6 @@ PlayState::PlayState(StateManager& manager)
       score(std::make_shared<bomberman::logic::Score>()),
       camera(800, 800) { // TODO: pass in the real window size instead of hardcoding it.
     world.initialize();
-    // TODO: attach score_ as an Observer to every relevant EntityModel - or,
-    // simpler, give World a way to attach a "global" observer (e.g. to the
-    // Player, plus every Wall/PowerUp as they're created) so Score doesn't
-    // need to know about every entity individually.
 }
 
 namespace {
@@ -59,10 +57,12 @@ void PlayState::update(float deltaTime) {
         view->update(deltaTime);
     }
 
-    // TODO: if (world_.isGameOver()) {
-    //     score_->saveHighScores(...);
-    //     manager_.changeState(std::make_unique<MenuState>(manager_));
-    // }
+    if (world.isGameOver()) {
+        timer += logic::Stopwatch::getInstance().getDeltaTime();
+        if (timer >= 5.0f) {
+            manager.changeState(std::make_unique<MenuState>(manager));
+        }
+    }
 }
 
 void PlayState::render(sf::RenderWindow& window) {
