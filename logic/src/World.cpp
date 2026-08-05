@@ -96,12 +96,12 @@ void World::update(float deltaTime) {
 
     auto playerScore = getPlayerScore();
 
-    if (!player->isAlive()) {
+    if (!gameOver && !player->isAlive()) {
         playerScore->addPlayerLost();
         gameOver = true;
     }
 
-    if (player->isAlive()) {
+    if (! gameOver && player->isAlive()) {
         bool anyBotsAlive = false;
         for (const auto& entity : entities) {
             auto character = std::dynamic_pointer_cast<Character>(entity);
