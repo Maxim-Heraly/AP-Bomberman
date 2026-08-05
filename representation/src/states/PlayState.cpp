@@ -3,6 +3,7 @@
 #include "logic/entities/Character.hpp"
 #include "representation/states/StateManager.hpp"
 #include "logic/utils/Stopwatch.hpp"
+#include "representation/views/ScoreView.hpp"
 
 namespace bomberman::representation {
 
@@ -71,6 +72,8 @@ void PlayState::render(sf::RenderWindow& window) {
     for (const auto& view : factory->getViews()) {
         view->draw(window, camera);
     }
+    ScoreView scoreView(world.getPlayerScore());
+    scoreView.draw(window, 10, 10);
 }
 
 } // namespace bomberman::representation

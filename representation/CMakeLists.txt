@@ -10,6 +10,7 @@ add_library(bomberman_representation STATIC
     src/views/BombView.cpp
     src/views/WallView.cpp
     src/views/PowerUpView.cpp
+    src/views/ScoreView.cpp
 )
 
 target_include_directories(bomberman_representation PUBLIC

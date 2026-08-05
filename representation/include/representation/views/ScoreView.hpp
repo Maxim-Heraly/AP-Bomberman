@@ -1,0 +1,24 @@
+#pragma once
+
+#include "logic/Score.hpp"
+#include "representation/views/EntityView.hpp"
+#include <SFML/Graphics.hpp>
+#include <memory>
+
+namespace bomberman::representation {
+
+    class ScoreView {
+    public:
+        ScoreView(std::shared_ptr<const bomberman::logic::Score> score);
+
+        void draw(sf::RenderWindow& window, int x, int y) const;
+
+    private:
+        std::shared_ptr<const bomberman::logic::Score> score;
+        mutable sf::Text scoreText;
+        sf::Font font;
+
+        void updateText() const;
+    };
+
+} // namespace bomberman::representation
