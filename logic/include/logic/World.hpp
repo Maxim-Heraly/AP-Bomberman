@@ -12,6 +12,7 @@ class Character;
 class Bomb;
 class Wall;
 class PowerUp;
+class Score;
 
 /**
  * @brief Owns every EntityModel currently in the arena and orchestrates
@@ -33,6 +34,7 @@ public:
 
     [[nodiscard]] const std::vector<std::shared_ptr<EntityModel>>& getEntities() const { return entities; }
     [[nodiscard]] std::shared_ptr<Character> getPlayer() const { return player; }
+    std::shared_ptr<Score> getPlayerScore() const;
 
     void placeBomb(Character& owner);
 

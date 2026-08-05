@@ -1,6 +1,7 @@
 #pragma once
 
 #include "logic/entities/Character.hpp"
+#include "logic/Score.hpp"
 
 namespace bomberman::logic {
 
@@ -9,8 +10,12 @@ namespace bomberman::logic {
 /// Game/PlayState - so this class itself stays input-library-agnostic.
 class Player : public Character {
 public:
-    Player(Vector2 position, Vector2 size) : Character(position, size) {}
+    Player(Vector2 position, Vector2 size) : Character(position, size), score(std::make_shared<Score>()) {}
 
+    std::shared_ptr<Score> getScore() const { return score; }
+
+private:
+    std::shared_ptr<Score> score;
     // TODO: Player-specific stat tracking for Score (blocks broken, powerups
     // collected, enemies killed, time alive) can live here, or entirely
     // inside Score via the Observer events - your choice, document the

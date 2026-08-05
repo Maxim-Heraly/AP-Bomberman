@@ -10,7 +10,6 @@ PlayState::PlayState(StateManager& manager)
     : State(manager),
       factory(std::make_shared<ConcreteFactory>()),
       world(factory),
-      score(std::make_shared<bomberman::logic::Score>()),
       camera(800, 800) { // TODO: pass in the real window size instead of hardcoding it.
     world.initialize();
 }

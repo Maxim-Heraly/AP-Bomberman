@@ -1,13 +1,8 @@
 #include "logic/Score.hpp"
 #include <fstream>
+#include <iostream>
 
 namespace bomberman::logic {
-
-void Score::onNotify(const Subject& /*source*/, EventType event) {
-    // TODO: switch (event) { case EventType::BlockDestroyed: currentScore_ += ...; ... }
-    // See section 2.1 "Scoring" for the required factors.
-    (void)event;
-}
 
 void Score::loadHighScores(const std::string& path) {
     // A missing file on the very first run is expected, not an error - only

@@ -57,7 +57,7 @@ std::shared_ptr<Character> ConcreteFactory::createCharacter(Vector2 position, bo
 std::shared_ptr<Bomb> ConcreteFactory::createBomb(Vector2 position, std::shared_ptr<Character> owner) {
     if (!owner) return nullptr;
 
-    Vector2 bombSize{0.07f, 0.07f};
+    Vector2 bombSize{0.09f, 0.09f};
     auto model = std::make_shared<Bomb>(position, bombSize, owner, owner->getBombRadius());
 
     auto view = std::make_shared<BombView>(model, arenaTexture, makeBombAnimationSet());

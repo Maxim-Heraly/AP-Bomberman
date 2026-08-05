@@ -10,6 +10,8 @@
 #include <functional>
 #include <unordered_set>
 
+#include "logic/entities/Player.hpp"
+
 namespace bomberman::logic {
 
 namespace {
@@ -54,6 +56,12 @@ World::World(std::shared_ptr<AbstractFactory> factory) : factory(std::move(facto
 void World::initialize() {
     generateArena();
 }
+
+std::shared_ptr<Score> World::getPlayerScore() const {
+    auto playerCast = std::dynamic_pointer_cast<Player>(player);
+    return playerCast ? playerCast->getScore() : nullptr;
+}
+
 void World::update(float deltaTime) {
     // TODO, suggested order:
     // 1. for each Bot in entities_: decideNextMove(*this)
@@ -86,7 +94,10 @@ void World::update(float deltaTime) {
             [](const std::shared_ptr<EntityModel>& entity) { return !entity->isAlive(); }),
         entities.end());
 
+    auto playerScore = getPlayerScore();
+
     if (!player->isAlive()) {
+        playerScore->addPlayerLost();
         gameOver = true;
     }
 
@@ -100,6 +111,7 @@ void World::update(float deltaTime) {
             }
         }
         if (!anyBotsAlive) {
+            playerScore->addPlayerWon();
             gameOver = true;
         }
     }
@@ -127,7 +139,11 @@ void World::placeBomb(Character& owner) {
         return;
     }
 
-    auto bomb = factory->createBomb(owner.getPosition(), ownerPtr);
+    Vector2 pos = owner.getPosition();
+    pos.x = std::floor((pos.x + 0.96f) / 0.1f) * 0.1f - 0.95f;
+    pos.y = std::floor((pos.y + 0.96f) / 0.1f) * 0.1f - 0.95f;
+
+    auto bomb = factory->createBomb(pos, ownerPtr);
     if (!bomb) {
         owner.onBombExploded();
         return;
@@ -224,10 +240,14 @@ void World::handleCollisions() {
 
     for (const auto& character : characters) {
         bool blocked = false;
+        auto playerScore = getPlayerScore();
 
         for (const auto& powerUp : powerUps) {
             if (character->intersects(*powerUp)) {
                 powerUp->applyEffect(*character);
+                if (character == player) {
+                    playerScore->addPowerUpCollected();
+                }
             }
         }
 
@@ -269,6 +289,10 @@ void World::explode(Bomb& bomb) {
     auto startBomb = std::dynamic_pointer_cast<Bomb>(*start);
     if (!startBomb) return;
 
+    auto playerScore = getPlayerScore();
+    auto owner = startBomb->getOwner().lock();
+    bool ownerIsPlayer = owner && owner == player;
+
     std::unordered_set<const Bomb*> processedBombs;
 
     std::function<void(const std::shared_ptr<Bomb>&)> explodeBomb =
@@ -298,6 +322,7 @@ void World::explode(Bomb& bomb) {
                         if (auto wall = std::dynamic_pointer_cast<Wall>(entity)) {
                             if (wall->isDestructible()) {
                                 wall->destroy();
+                                playerScore->addBlockDestroyed();
                                 if (Random::getInstance().chance(0.33f)) {
                                     auto chance = Random::getInstance().getInt(1,3);
                                     PowerUpType type;
@@ -322,6 +347,9 @@ void World::explode(Bomb& bomb) {
                             continue;
                         }
                         if (auto character = std::dynamic_pointer_cast<Character>(entity)) {
+                            if (character != player && ownerIsPlayer) {
+                                playerScore->addEnemyKilled();
+                            }
                             character->die();
                             continue;
                         }
