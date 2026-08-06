@@ -57,11 +57,6 @@ void World::initialize() {
     generateArena();
 }
 
-std::shared_ptr<Score> World::getPlayerScore() const {
-    auto playerCast = std::dynamic_pointer_cast<Player>(player);
-    return playerCast ? playerCast->getScore() : nullptr;
-}
-
 void World::update(float deltaTime) {
     // TODO, suggested order:
     // 1. for each Bot in entities_: decideNextMove(*this)
@@ -93,8 +88,6 @@ void World::update(float deltaTime) {
         std::remove_if(entities.begin(), entities.end(),
             [](const std::shared_ptr<EntityModel>& entity) { return !entity->isAlive(); }),
         entities.end());
-
-    auto playerScore = getPlayerScore();
 
     if (!gameOver && !player->isAlive()) {
         score->addPlayerLost();
@@ -240,7 +233,6 @@ void World::handleCollisions() {
 
     for (const auto& character : characters) {
         bool blocked = false;
-        auto playerScore = getPlayerScore();
 
         for (const auto& powerUp : powerUps) {
             if (character->intersects(*powerUp)) {
@@ -289,7 +281,6 @@ void World::explode(Bomb& bomb) {
     auto startBomb = std::dynamic_pointer_cast<Bomb>(*start);
     if (!startBomb) return;
 
-    auto playerScore = getPlayerScore();
     auto owner = startBomb->getOwner().lock();
     bool ownerIsPlayer = owner && owner == player;
 
