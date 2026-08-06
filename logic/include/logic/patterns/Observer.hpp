@@ -21,7 +21,10 @@ enum class EventType {
     PowerUpCollected,       // A Character walked over and collected a PowerUp.
     Died,                    // An Entity (Character) was caught in an explosion.
     PlayerWon,                // The human Player is the last one standing.
-    PlayerLost                 // The human Player died.
+    PlayerLost,                 // The human Player died.
+    PlayerCollectedPowerUp,     // scoring events
+    PlayerDestroyedBlock,       // ||
+    EnemyKilled                 // ||
 };
 
 /**

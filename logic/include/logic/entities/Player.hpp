@@ -10,7 +10,7 @@ namespace bomberman::logic {
 /// Game/PlayState - so this class itself stays input-library-agnostic.
 class Player : public Character {
 public:
-    Player(Vector2 position, Vector2 size) : Character(position, size), score(std::make_shared<Score>()) {}
+    Player(Vector2 position, Vector2 size) : Character(position, size) {}
 
     std::shared_ptr<Score> getScore() const { return score; }
 

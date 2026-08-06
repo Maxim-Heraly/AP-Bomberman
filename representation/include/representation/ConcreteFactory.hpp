@@ -42,6 +42,7 @@ public:
 
 private:
     std::vector<std::shared_ptr<EntityView>> views;
+    std::shared_ptr<logic::Score> score = logic::Score::getInstance();
     std::shared_ptr<sf::Texture> characterTexture;
     std::shared_ptr<sf::Texture> arenaTexture;
     std::shared_ptr<sf::Texture> powerUpTexture;

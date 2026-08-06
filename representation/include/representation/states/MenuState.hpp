@@ -22,7 +22,7 @@ namespace bomberman::representation {
         void render(sf::RenderWindow& window) override;
 
     private:
-    bomberman::logic::Score score; // Used read-only here, just to load and display the top-5.
+    std::shared_ptr<logic::Score> score = logic::Score::getInstance(); // Used read-only here, just to load and display the top-5.
     sf::FloatRect playButtonBounds; // Recomputed every render() call, used by handleEvent() to detect clicks.
 };
 

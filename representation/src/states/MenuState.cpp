@@ -11,7 +11,7 @@ constexpr float ButtonHeight = 60.f;
 } // namespace
 
 MenuState::MenuState(StateManager& manager) : State(manager) {
-    //score_.loadHighScores(HIGHSCORE_PATH);
+    score->loadHighScores("../../highscores.txt");
 }
 
 void MenuState::handleEvent(const sf::Event& event) {
@@ -50,7 +50,7 @@ void MenuState::render(sf::RenderWindow& window) {
     window.draw(subtitle);
 
     float y = 155.f;
-    const auto& topFive = score.getTopFive();
+    const auto& topFive = score->getTopFive();
     if (topFive.empty()) {
         sf::Text none("No scores yet - be the first!", font, 18);
         none.setFillColor(sf::Color(160, 160, 160));

@@ -97,7 +97,7 @@ void World::update(float deltaTime) {
     auto playerScore = getPlayerScore();
 
     if (!gameOver && !player->isAlive()) {
-        playerScore->addPlayerLost();
+        score->addPlayerLost();
         gameOver = true;
     }
 
@@ -111,7 +111,7 @@ void World::update(float deltaTime) {
             }
         }
         if (!anyBotsAlive) {
-            playerScore->addPlayerWon();
+            score->addPlayerWon();
             gameOver = true;
         }
     }
@@ -246,7 +246,7 @@ void World::handleCollisions() {
             if (character->intersects(*powerUp)) {
                 powerUp->applyEffect(*character);
                 if (character == player) {
-                    playerScore->addPowerUpCollected();
+                    character->collectPowerUp();
                 }
             }
         }
@@ -322,7 +322,9 @@ void World::explode(Bomb& bomb) {
                         if (auto wall = std::dynamic_pointer_cast<Wall>(entity)) {
                             if (wall->isDestructible()) {
                                 wall->destroy();
-                                playerScore->addBlockDestroyed();
+                                if (ownerIsPlayer) {
+                                    owner->declareBlockDestroyed();
+                                }
                                 if (Random::getInstance().chance(0.33f)) {
                                     auto chance = Random::getInstance().getInt(1,3);
                                     PowerUpType type;
@@ -348,7 +350,7 @@ void World::explode(Bomb& bomb) {
                         }
                         if (auto character = std::dynamic_pointer_cast<Character>(entity)) {
                             if (character != player && ownerIsPlayer) {
-                                playerScore->addEnemyKilled();
+                                character->declareEnemyKilled();
                             }
                             character->die();
                             continue;

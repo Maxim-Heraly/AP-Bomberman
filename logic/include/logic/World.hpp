@@ -2,6 +2,7 @@
 
 #include "logic/patterns/AbstractFactory.hpp"
 #include "logic/utils/Vector2.hpp"
+#include "Score.hpp"
 #include <memory>
 #include <vector>
 
@@ -48,6 +49,7 @@ private:
     std::shared_ptr<AbstractFactory> factory;
     std::vector<std::shared_ptr<EntityModel>> entities;
     std::shared_ptr<Character> player;
+    std::shared_ptr<Score> score = Score::getInstance();
     bool gameOver{false};
 };
 

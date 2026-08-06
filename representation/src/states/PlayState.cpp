@@ -4,11 +4,13 @@
 #include "representation/states/StateManager.hpp"
 #include "logic/utils/Stopwatch.hpp"
 #include "representation/views/ScoreView.hpp"
+#include "logic/Score.hpp"
 
 namespace bomberman::representation {
 
 PlayState::PlayState(StateManager& manager)
     : State(manager),
+      score(logic::Score::getInstance()),
       factory(std::make_shared<ConcreteFactory>()),
       world(factory),
       camera(800, 800) { // TODO: pass in the real window size instead of hardcoding it.
@@ -60,6 +62,7 @@ void PlayState::update(float deltaTime) {
     if (world.isGameOver()) {
         timer += logic::Stopwatch::getInstance().getDeltaTime();
         if (timer >= 5.0f) {
+            score->saveHighScores("../../highscores.txt");
             manager.changeState(std::make_unique<MenuState>(manager));
         }
     }
@@ -72,7 +75,7 @@ void PlayState::render(sf::RenderWindow& window) {
     for (const auto& view : factory->getViews()) {
         view->draw(window, camera);
     }
-    ScoreView scoreView(world.getPlayerScore());
+    ScoreView scoreView(logic::Score::getInstance());
     scoreView.draw(window, 10, 10);
 }
 

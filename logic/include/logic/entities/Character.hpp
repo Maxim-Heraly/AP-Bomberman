@@ -63,6 +63,12 @@ public:
     /// movement direction for the next update().
     void setMovementInput(Direction direction) { movementInput = direction; }
 
+    void declareEnemyKilled() { notify(EventType::EnemyKilled); }
+    void collectPowerUp() { notify(EventType::PlayerCollectedPowerUp); }
+    void declareBlockDestroyed() { notify(EventType::PlayerDestroyedBlock); }
+    void declareWin() { notify(EventType::PlayerWon); }
+    void declareLoss() { notify(EventType::PlayerLost); }
+
 protected:
     float speed{0.5f};
     int bombRadius{1};

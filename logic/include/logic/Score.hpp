@@ -1,5 +1,8 @@
 #pragma once
 
+#include <memory>
+
+#include "logic/patterns/Observer.hpp"
 #include <string>
 #include <vector>
 
@@ -15,8 +18,17 @@ struct HighScoreEntry {
  * top-5 high scores to disk between runs (section 3.1, "Score").
  *
  */
-class Score {
+class Score : public Observer {
 public:
+    static std::shared_ptr<Score> getInstance() {
+        static auto instance = std::shared_ptr<Score>(new Score);
+        return instance;
+    }
+
+    Score(const Score&) = delete;
+    Score& operator=(const Score&) = delete;
+
+    void onNotify(const Subject &source, EventType event) override;
 
     [[nodiscard]] int getCurrentScore() const { return currentScore; }
     void addEnemyKilled() { currentScore += 100; }
@@ -33,6 +45,8 @@ public:
     [[nodiscard]] const std::vector<HighScoreEntry>& getTopFive() const { return highScores; }
 
 private:
+    Score() : currentScore{0} {}
+
     int currentScore{0};
 
     std::vector<HighScoreEntry> highScores; // TODO: keep sorted descending, capped at 5 entries.

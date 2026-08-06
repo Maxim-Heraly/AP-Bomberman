@@ -36,6 +36,7 @@ std::shared_ptr<Character> ConcreteFactory::createCharacter(Vector2 position, bo
     std::shared_ptr<Character> model;
     if (isPlayer) {
         model = std::make_shared<Player>(position, characterSize);
+        model->attach(score);
     } else {
         model = std::make_shared<Bot>(position, characterSize);
     }

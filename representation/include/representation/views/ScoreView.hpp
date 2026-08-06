@@ -14,7 +14,7 @@ namespace bomberman::representation {
         void draw(sf::RenderWindow& window, int x, int y) const;
 
     private:
-        std::shared_ptr<const bomberman::logic::Score> score;
+        std::shared_ptr<const bomberman::logic::Score> score = logic::Score::getInstance();
         mutable sf::Text scoreText;
         sf::Font font;
 
