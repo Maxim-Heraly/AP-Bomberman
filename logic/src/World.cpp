@@ -65,61 +65,62 @@ void World::update(float deltaTime) {
     // 4. for each Bomb with hasExploded(): explode(*bomb)
     // 5. erase-remove every entity with !isAlive() from entities_
     // 6. update gameOver_ (Player died, or Player is the last Character standing)
-
-    std::vector<std::shared_ptr<Bot>> bots;
-    bots.reserve(entities.size());
-    for (const auto& entity : entities) {
-        if (auto bot = std::dynamic_pointer_cast<Bot>(entity)) {
-            bots.push_back(std::move(bot));
-        }
-    }
-    for (const auto& bot : bots) {
-        if (bot->isAlive()) {
-            bot->decideNextMove(*this);
-        }
-    }
-
-    for (const auto& entity : entities) {
-        entity->update(deltaTime);
-    }
-
-    handleCollisions();
-
-    std::vector<std::shared_ptr<Bomb>> explodedBombs;
-    explodedBombs.reserve(entities.size());
-    for (const auto& entity : entities) {
-        auto bomb = std::dynamic_pointer_cast<Bomb>(entity);
-        if (bomb && bomb->hasExploded()) {
-            explodedBombs.push_back(bomb);
-        }
-    }
-
-    for (const auto& bomb : explodedBombs) {
-        explode(*bomb);
-    }
-
-    entities.erase(
-        std::remove_if(entities.begin(), entities.end(),
-            [](const std::shared_ptr<EntityModel>& entity) { return !entity->isAlive(); }),
-        entities.end());
-
-    if (!gameOver && !player->isAlive()) {
-        score->addPlayerLost();
-        gameOver = true;
-    }
-
-    if (! gameOver && player->isAlive()) {
-        bool anyBotsAlive = false;
+    if (!gameOver) {
+        std::vector<std::shared_ptr<Bot>> bots;
+        bots.reserve(entities.size());
         for (const auto& entity : entities) {
-            auto character = std::dynamic_pointer_cast<Character>(entity);
-            if (character && character.get() != player.get() && character->isAlive()) {
-                anyBotsAlive = true;
-                break;
+            if (auto bot = std::dynamic_pointer_cast<Bot>(entity)) {
+                bots.push_back(std::move(bot));
             }
         }
-        if (!anyBotsAlive) {
-            score->addPlayerWon();
+        for (const auto& bot : bots) {
+            if (bot->isAlive()) {
+                bot->decideNextMove(*this);
+            }
+        }
+
+        for (const auto& entity : entities) {
+            entity->update(deltaTime);
+        }
+
+        handleCollisions();
+
+        std::vector<std::shared_ptr<Bomb>> explodedBombs;
+        explodedBombs.reserve(entities.size());
+        for (const auto& entity : entities) {
+            auto bomb = std::dynamic_pointer_cast<Bomb>(entity);
+            if (bomb && bomb->hasExploded()) {
+                explodedBombs.push_back(bomb);
+            }
+        }
+
+        for (const auto& bomb : explodedBombs) {
+            explode(*bomb);
+        }
+
+        entities.erase(
+            std::remove_if(entities.begin(), entities.end(),
+                [](const std::shared_ptr<EntityModel>& entity) { return !entity->isAlive(); }),
+            entities.end());
+
+        if (!gameOver && !player->isAlive()) {
+            score->addPlayerLost();
             gameOver = true;
+        }
+
+        if (! gameOver && player->isAlive()) {
+            bool anyBotsAlive = false;
+            for (const auto& entity : entities) {
+                auto character = std::dynamic_pointer_cast<Character>(entity);
+                if (character && character.get() != player.get() && character->isAlive()) {
+                    anyBotsAlive = true;
+                    break;
+                }
+            }
+            if (!anyBotsAlive) {
+                score->addPlayerWon();
+                gameOver = true;
+            }
         }
     }
 }

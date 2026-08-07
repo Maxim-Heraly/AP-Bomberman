@@ -30,7 +30,7 @@ namespace {
 
 void PlayState::handleEvent(const sf::Event& event) {
     const auto player = world.getPlayer();
-    if (!player) return;
+    if (!player || world.isGameOver()) return;
 
     if (event.type == sf::Event::KeyPressed) {
         if (event.key.code == sf::Keyboard::Space) {
