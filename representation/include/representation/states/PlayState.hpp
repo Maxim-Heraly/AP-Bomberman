@@ -13,22 +13,15 @@ namespace bomberman::representation {
 
 /**
  * @brief Owns one "run" of the game: a World, its ConcreteFactory, a Camera
- * and a Score. TODO:
- *   - handleEvent(): translate arrow-key / spacebar presses into
- *     world_.getPlayer()->setMovementInput(...) / world_.placeBomb(...)
- *     calls - this class should only know *that* an action was requested,
- *     not *how* it affects the World (section 3.1, "Game" description).
- *   - update(): world_.update(deltaTime); if (world_.isGameOver()) persist
- *     the score and manager_.changeState(...) back to a MenuState.
- *   - render(): draw every EntityView from factory_->getViews().
+ * and a Score.
  */
 class PlayState : public State {
 public:
     explicit PlayState(StateManager& manager);
 
-    void handleEvent(const sf::Event& event) override; // TODO
-    void update(float deltaTime) override;              // TODO
-    void render(sf::RenderWindow& window) override;     // TODO
+    void handleEvent(const sf::Event& event) override;
+    void update(float deltaTime) override;
+    void render(sf::RenderWindow& window) override;
 
 private:
     std::shared_ptr<ConcreteFactory> factory;

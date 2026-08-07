@@ -32,7 +32,7 @@ ConcreteFactory::ConcreteFactory() {
 }
 
 std::shared_ptr<Character> ConcreteFactory::createCharacter(Vector2 position, bool isPlayer) {
-    Vector2 characterSize{0.08f, 0.08f};
+    Vector2 characterSize{2.f/15*0.8, 2.f/13*0.8};
     std::shared_ptr<Character> model;
     if (isPlayer) {
         model = std::make_shared<Player>(position, characterSize);
@@ -58,7 +58,7 @@ std::shared_ptr<Character> ConcreteFactory::createCharacter(Vector2 position, bo
 std::shared_ptr<Bomb> ConcreteFactory::createBomb(Vector2 position, std::shared_ptr<Character> owner) {
     if (!owner) return nullptr;
 
-    Vector2 bombSize{0.09f, 0.09f};
+    Vector2 bombSize{2.f/15*0.9, 2.f/13*0.9};
     auto model = std::make_shared<Bomb>(position, bombSize, owner, owner->getBombRadius());
 
     auto view = std::make_shared<BombView>(model, arenaTexture, makeBombAnimationSet());
@@ -69,7 +69,7 @@ std::shared_ptr<Bomb> ConcreteFactory::createBomb(Vector2 position, std::shared_
 }
 
 std::shared_ptr<Wall> ConcreteFactory::createWall(Vector2 position, bool destructible) {
-    Vector2 wallSize{0.1f, 0.1f};
+    Vector2 wallSize{2.f/15, 2.f/13};
     auto model = std::make_shared<Wall>(position, wallSize, destructible);
     auto view = std::make_shared<WallView>(model, arenaTexture, makeWallAnimationSet(destructible ? WallSpriteVariant::Destructible : WallSpriteVariant::Indestructible));
     model->attach(view);
@@ -79,7 +79,7 @@ std::shared_ptr<Wall> ConcreteFactory::createWall(Vector2 position, bool destruc
 }
 
 std::shared_ptr<PowerUp> ConcreteFactory::createPowerUp(Vector2 position, PowerUpType type) {
-    Vector2 powerUpSize{0.09f, 0.09f};
+    Vector2 powerUpSize{2.f/15*0.9, 2.f/13*0.9};
 
     if (type == PowerUpType::Fire) {
         auto model = std::make_shared<FirePowerUp>(position, powerUpSize);

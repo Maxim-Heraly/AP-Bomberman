@@ -31,6 +31,7 @@ public:
     void onNotify(const Subject &source, EventType event) override;
 
     [[nodiscard]] int getCurrentScore() const { return currentScore; }
+    void setCurrentScore(int score) { currentScore = score; }
     void addEnemyKilled() { currentScore += 100; }
     void addBlockDestroyed() { currentScore += 10; }
     void addPowerUpCollected() { currentScore += 25; }
@@ -49,7 +50,7 @@ private:
 
     int currentScore{0};
 
-    std::vector<HighScoreEntry> highScores; // TODO: keep sorted descending, capped at 5 entries.
+    std::vector<HighScoreEntry> highScores;
 };
 
 } // namespace bomberman::logic

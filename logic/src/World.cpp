@@ -1,6 +1,7 @@
 #include "logic/World.hpp"
 #include "logic/entities/Bomb.hpp"
 #include "logic/entities/Character.hpp"
+#include "logic/entities/Bot.hpp"
 #include "logic/entities/PowerUp.hpp"
 #include "logic/entities/Wall.hpp"
 #include "logic/utils/Random.hpp"
@@ -65,6 +66,20 @@ void World::update(float deltaTime) {
     // 4. for each Bomb with hasExploded(): explode(*bomb)
     // 5. erase-remove every entity with !isAlive() from entities_
     // 6. update gameOver_ (Player died, or Player is the last Character standing)
+
+    std::vector<std::shared_ptr<Bot>> bots;
+    bots.reserve(entities.size());
+    for (const auto& entity : entities) {
+        if (auto bot = std::dynamic_pointer_cast<Bot>(entity)) {
+            bots.push_back(std::move(bot));
+        }
+    }
+    for (const auto& bot : bots) {
+        if (bot->isAlive()) {
+            bot->decideNextMove(*this);
+        }
+    }
+
     for (const auto& entity : entities) {
         entity->update(deltaTime);
     }
@@ -132,9 +147,12 @@ void World::placeBomb(Character& owner) {
         return;
     }
 
+    constexpr float tileWidth = 2.0f / 15.0f;
+    constexpr float tileHeight = 2.0f / 13.0f;
+
     Vector2 pos = owner.getPosition();
-    pos.x = std::floor((pos.x + 0.96f) / 0.1f) * 0.1f - 0.95f;
-    pos.y = std::floor((pos.y + 0.96f) / 0.1f) * 0.1f - 0.95f;
+    pos.x = -1.0f + (std::round((pos.x + 1.0f - tileWidth * 0.5f) / tileWidth) + 0.5f) * tileWidth;
+    pos.y = -1.0f + (std::round((pos.y + 1.0f - tileHeight * 0.5f) / tileHeight) + 0.5f) * tileHeight;
 
     auto bomb = factory->createBomb(pos, ownerPtr);
     if (!bomb) {
@@ -151,21 +169,30 @@ void World::generateArena() {
         throw std::runtime_error("Failed to load arena.txt");
     }
 
+    // Grid is 15 columns x 13 rows and must
+    // exactly fill [-1, 1] on both axes - so tile width/height are derived
+    // from the grid size rather than hardcoded, and can differ from each
+    // other since the world doesn't need square tiles (Camera stretches
+    // world space to the window independently on each axis anyway).
+    constexpr int kColumns = 15;
+    constexpr int kRows = 13;
+    constexpr float tileWidth = 2.0f / kColumns;
+    constexpr float tileHeight = 2.0f / kRows;
+
     std::string line;
-    float yPos = -0.95f;
-    const float tileSize = 0.1f;
+    float yPos = -1.0f + tileHeight * 0.5f;
 
     while (std::getline(file, line)) {
-        float xPos = -0.95f;
+        float xPos = -1.0f + tileWidth * 0.5f;
 
         for (char c : line) {
             if (c == ' ') {
-                xPos += tileSize;
+                xPos += tileWidth;
                 continue;
             }
 
             Vector2 pos{xPos, yPos};
-            Vector2 size{tileSize * 0.9f, tileSize * 0.9f};
+            Vector2 size{tileWidth * 0.9f, tileHeight * 0.9f};
 
             switch (c) {
                 case 'W': {
@@ -196,10 +223,10 @@ void World::generateArena() {
                     break;
             }
 
-            xPos += tileSize;
+            xPos += tileWidth;
         }
 
-        yPos += tileSize;
+        yPos += tileHeight;
     }
 }
 

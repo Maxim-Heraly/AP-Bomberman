@@ -20,6 +20,7 @@ void MenuState::handleEvent(const sf::Event& event) {
     }
     const auto click = sf::Vector2f(static_cast<float>(event.mouseButton.x), static_cast<float>(event.mouseButton.y));
     if (playButtonBounds.contains(click)) {
+        score->setCurrentScore(0);
         manager.changeState(std::make_unique<PlayState>(manager));
     }
 }

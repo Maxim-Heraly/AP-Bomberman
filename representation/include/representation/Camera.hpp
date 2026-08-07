@@ -4,45 +4,48 @@
 
 namespace bomberman::representation {
 
-/**
- * @brief Projects normalized World coordinates ([-1, 1] on both axes, see
- * World/EntityModel, section 3.1 "Camera") to pixel coordinates on the
- * current window. Implemented manually (no SFML transforms) so the logic
- * library never has to know about pixels, and the game could theoretically
- * be driven by a completely different renderer.
- *
- * A minimal, centered/uniform-scale implementation is provided below - feel
- * free to replace it (e.g. to support a non-square arena, or letterboxing
- * when the window is resized to a different aspect ratio).
- */
-class Camera {
-public:
-    Camera(unsigned int windowWidth, unsigned int windowHeight)
-        : windowWidth(windowWidth), windowHeight(windowHeight) {}
+    /**
+     * @brief Projects normalized World coordinates ([-1, 1] on both axes, see
+     * World/EntityModel, section 3.1 "Camera") to pixel coordinates on the
+     * current window.
+     *
+     * The world is always a rectangle (World::generateArena() lays out a 15x13
+     * grid of tiles centered on the origin, exactly filling
+     * [-1, 1] on both axes).
+     *
+     * Unlike a letterboxed/pillarboxed camera, this maps the full [-1, 1] range
+     * independently on X and Y to the full window width/height, so the arena's
+     * outer walls always sit flush against the window's edges, and the whole
+     * scene stretches/scales to fill the window exactly - no bars, no gaps.
+     */
+    class Camera {
+    public:
+        Camera(unsigned int windowWidth, unsigned int windowHeight)
+            : windowWidth(windowWidth), windowHeight(windowHeight) {}
 
-    void setWindowSize(unsigned int width, unsigned int height) {
-        windowWidth = width;
-        windowHeight = height;
-    }
+        void setWindowSize(unsigned int width, unsigned int height) {
+            windowWidth = width;
+            windowHeight = height;
+        }
 
-    /// Maps world [-1, 1] -> pixels [0, windowWidth_] / [0, windowHeight_].
-    bomberman::logic::Vector2 worldToScreen(const bomberman::logic::Vector2& world) const {
-        const float px = (world.x + 1.f) * 0.665f * static_cast<float>(windowWidth);
-        const float py = (world.y + 1.f) * 0.665f * 800;
-        return {px, py};
-    }
+        /// Maps world [-1, 1] -> pixels, filling the entire window on both axes.
+        bomberman::logic::Vector2 worldToScreen(const bomberman::logic::Vector2& world) const {
+            const float px = (world.x + 1.f) * 0.5f * static_cast<float>(windowWidth);
+            const float py = (world.y + 1.f) * 0.5f * static_cast<float>(windowHeight);
+            return {px, py};
+        }
 
-    /// TODO: use this (e.g. in each EntityView::draw()) to compute the
-    /// on-screen width/height of a sprite, so it scales correctly if the
-    /// window is resized.
-    bomberman::logic::Vector2 worldSizeToScreen(const bomberman::logic::Vector2& size) const {
-        return {size.x * 0.665f * static_cast<float>(windowWidth),
-                size.y * 0.665f * 800};
-    }
+        /// Use this (e.g. in each EntityView::draw()) to compute the on-screen
+        /// width/height of a sprite, so it scales correctly - independently on
+        /// each axis - if the window is resized.
+        bomberman::logic::Vector2 worldSizeToScreen(const bomberman::logic::Vector2& size) const {
+            return {size.x * 0.5f * static_cast<float>(windowWidth),
+                    size.y * 0.5f * static_cast<float>(windowHeight)};
+        }
 
-private:
-    unsigned int windowWidth;
-    unsigned int windowHeight;
-};
+    private:
+        unsigned int windowWidth;
+        unsigned int windowHeight;
+    };
 
 } // namespace bomberman::representation

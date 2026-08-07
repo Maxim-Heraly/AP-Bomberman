@@ -1,2 +1,5 @@
-Player,100
-Player,85
+Player,1010
+Player,545
+Player,510
+Player,500
+Player,500
