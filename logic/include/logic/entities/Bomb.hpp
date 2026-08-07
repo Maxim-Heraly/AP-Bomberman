@@ -8,13 +8,6 @@ namespace bomberman::logic {
 
 class Character;
 
-/**
- * @brief TODO: implement update() to count fuseRemaining_ down and, once it
- * reaches zero, notify(EventType::BombExploded) and markDead(). The actual
- * "cross-shaped destruction" logic belongs in World::explode() (it needs to
- * inspect neighbouring Walls/Bombs/Characters) - this class only owns its
- * own timer/radius/owner state (section 2.1, "Bombs and Explosions").
- */
 class Bomb : public EntityModel {
 public:
     struct BlastProfile {

@@ -10,15 +10,15 @@ void StateManager::changeState(std::unique_ptr<State> newState) {
     currentState = std::move(newState);
 }
 
-void StateManager::handleEvent(const sf::Event& event) {
+void StateManager::handleEvent(const sf::Event& event) const {
     if (currentState) currentState->handleEvent(event);
 }
 
-void StateManager::update(float deltaTime) {
+void StateManager::update(float deltaTime) const {
     if (currentState) currentState->update(deltaTime);
 }
 
-void StateManager::render(sf::RenderWindow& window) {
+void StateManager::render(sf::RenderWindow& window) const {
     if (currentState) currentState->render(window);
 }
 

@@ -2,7 +2,7 @@
 
 namespace bomberman::logic {
 
-/// Simple 2D float vector, fully implemented since it's a generic math
+/// Simple 2D float vector, it's a generic math
 /// utility. Used both for World-space positions (normalized to [-1, 1], see
 /// World/EntityModel and Camera) and, in the representation code, for
 /// pixel-space positions.

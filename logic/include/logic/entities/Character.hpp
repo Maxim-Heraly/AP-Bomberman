@@ -2,7 +2,6 @@
 
 #include "logic/entities/EntityModel.hpp"
 #include "logic/utils/Direction.hpp"
-#include <vector>
 
 namespace bomberman::logic {
 
@@ -10,12 +9,6 @@ namespace bomberman::logic {
  * @brief Shared base for the human Player and the computer-controlled Bots
  * (see Player.hpp / Bot.hpp). Holds every stat a power-up can influence.
  *
- * TODO: implement update() - apply movementInput_ (scaled by speed_ *
- * deltaTime) to position_, update facing_, notify(EventType::Moved).
- * Blocking movement against Walls/Bombs is World's job (section 2.1,
- * "Player Controls & Interactions with Objects") - decide in your report
- * whether you resolve that by having World revert position_ after the fact,
- * or by querying World before moving.
  */
 
 class Bomb;

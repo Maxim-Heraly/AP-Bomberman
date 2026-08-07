@@ -8,7 +8,7 @@ namespace bomberman::logic {
 /// CharacterView (representation) so the View knows which walk animation to play.
 enum class Direction { Up, Down, Left, Right, None };
 
-/// Convenience helper, fully implemented: converts a Direction into a unit
+/// Convenience helper: converts a Direction into a unit
 /// vector you can scale by speed * deltaTime, e.g. in Character::update().
 inline Vector2 directionToVector(Direction direction) {
     switch (direction) {

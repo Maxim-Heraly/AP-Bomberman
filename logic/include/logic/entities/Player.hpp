@@ -1,7 +1,6 @@
 #pragma once
 
 #include "logic/entities/Character.hpp"
-#include "logic/Score.hpp"
 
 namespace bomberman::logic {
 

@@ -13,13 +13,13 @@ class State;
 class StateManager {
 public:
     StateManager();
-    ~StateManager(); // Declared (defined = default in the .cpp) so unique_ptr<State> works with an incomplete State here.
+    ~StateManager();
 
     void changeState(std::unique_ptr<State> newState);
 
-    void handleEvent(const sf::Event& event);
-    void update(float deltaTime);
-    void render(sf::RenderWindow& window);
+    void handleEvent(const sf::Event& event) const;
+    void update(float deltaTime) const;
+    void render(sf::RenderWindow& window) const;
 
 private:
     std::unique_ptr<State> currentState;

@@ -18,7 +18,7 @@ public:
 
 private:
     void processEvents();
-    void update(float deltaTime);
+    void update(float deltaTime) const;
     void render();
 
     sf::RenderWindow window;

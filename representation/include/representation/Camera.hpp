@@ -29,7 +29,7 @@ namespace bomberman::representation {
         }
 
         /// Maps world [-1, 1] -> pixels, filling the entire window on both axes.
-        bomberman::logic::Vector2 worldToScreen(const bomberman::logic::Vector2& world) const {
+        logic::Vector2 worldToScreen(const logic::Vector2& world) const {
             const float px = (world.x + 1.f) * 0.5f * static_cast<float>(windowWidth);
             const float py = (world.y + 1.f) * 0.5f * static_cast<float>(windowHeight);
             return {px, py};
@@ -38,7 +38,7 @@ namespace bomberman::representation {
         /// Use this (e.g. in each EntityView::draw()) to compute the on-screen
         /// width/height of a sprite, so it scales correctly - independently on
         /// each axis - if the window is resized.
-        bomberman::logic::Vector2 worldSizeToScreen(const bomberman::logic::Vector2& size) const {
+        logic::Vector2 worldSizeToScreen(const logic::Vector2& size) const {
             return {size.x * 0.5f * static_cast<float>(windowWidth),
                     size.y * 0.5f * static_cast<float>(windowHeight)};
         }

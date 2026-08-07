@@ -6,7 +6,7 @@
 namespace bomberman::logic {
 
 /**
- * @brief Base class ("Model" in MVC, see section 3.1.1) for every object
+ * @brief Base class ("Model" in MVC) for every object
  * that lives in the World: Character, Bomb, Wall and PowerUp all derive
  * from this.
  *
@@ -23,16 +23,15 @@ public:
 
     [[nodiscard]] bool isAlive() const { return alive; }
 
-    /// TODO: implement in each subclass - advance this entity's state by one
+    /// Advance this entity's state by one
     /// tick. Call notify(EventType::...) whenever something happens that
     /// Score/Views need to know about (e.g. notify(EventType::Moved) after
-    /// changing position_).
+    /// changing position).
     virtual void update(float deltaTime) = 0;
 
-    /// TODO: use this in World::handleCollisions() - basic axis-aligned
-    /// bounding-box overlap test, centered on position_ with size_ as full
-    /// width/height. Do NOT use sf::FloatRect here: this class must stay
-    /// completely SFML-free (see section 3.1, "Code Design").
+    /// Basic axis-aligned
+    /// bounding-box overlap test, centered on position with size as full
+    /// width/height.
     [[nodiscard]] bool intersects(const EntityModel& other) const;
 
 protected:
@@ -40,9 +39,6 @@ protected:
     Vector2 size;
     bool alive{true};
 
-    /// TODO: call this (together with notify(EventType::Died) where
-    /// appropriate) from subclasses when this entity should be removed by
-    /// World on its next update.
     void markDead() { alive = false; }
 };
 

@@ -2,10 +2,10 @@
 
 namespace bomberman::representation {
 
-    ScoreView::ScoreView(std::shared_ptr<const bomberman::logic::Score> score)
+    ScoreView::ScoreView(std::shared_ptr<const logic::Score> score)
         : score(std::move(score)) {
         if (!font.loadFromFile(ASSET_DIR "/fonts/PublicPixel-rv0pA.ttf")) {
-            // Fallback if font not found - ScoreView will still work, just with default font
+            throw std::runtime_error("Failed to load font");
         }
         scoreText.setFont(font);
         scoreText.setCharacterSize(20);

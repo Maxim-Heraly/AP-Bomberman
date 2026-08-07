@@ -15,13 +15,13 @@ namespace {
         return {left, top, kFrameWidth, kFrameHeight};
     }
 
-    std::size_t dirIndex(bomberman::logic::Direction direction) {
+    std::size_t dirIndex(logic::Direction direction) {
         switch (direction) {
-            case bomberman::logic::Direction::Up: return 0;
-            case bomberman::logic::Direction::Down: return 1;
-            case bomberman::logic::Direction::Left: return 2;
-            case bomberman::logic::Direction::Right: return 3;
-            case bomberman::logic::Direction::None: return 1; // Default to Down
+            case logic::Direction::Up: return 0;
+            case logic::Direction::Down: return 1;
+            case logic::Direction::Left: return 2;
+            case logic::Direction::Right: return 3;
+            case logic::Direction::None: return 1; // Default to Down
         }
         return 1; // Default to Down
     }
@@ -98,17 +98,14 @@ CharacterAnimationSet makeCharacterAnimationSet(CharacterSpriteVariant variant) 
                    WalkSet{});
 }
 
-void CharacterView::onNotify(const bomberman::logic::Subject& source, bomberman::logic::EventType event) {
-    // TODO: switch (event) to pick the right animation - advance the
-    // walk-cycle frame for model_->getFacing() on Moved, switch to the
-    // death animation on Died (section 2.2, "Visuals and Aesthetics").
+void CharacterView::onNotify(const logic::Subject& source, logic::EventType event) {
     (void)source;
-    if (event == bomberman::logic::EventType::Died) {
+    if (event == logic::EventType::Died) {
         markedForRemoval = true;
     }
 }
 
-CharacterView::CharacterView(std::shared_ptr<const bomberman::logic::Character> model,
+CharacterView::CharacterView(std::shared_ptr<const logic::Character> model,
                              std::shared_ptr<sf::Texture> texture,
                              CharacterAnimationSet animationSet)
     : model(std::move(model)), texture(std::move(texture)), animationSet(std::move(animationSet)) {

@@ -11,7 +11,6 @@
 #include <functional>
 #include <unordered_set>
 
-#include "logic/entities/Player.hpp"
 
 namespace bomberman::logic {
 
@@ -192,7 +191,6 @@ void World::generateArena() {
             }
 
             Vector2 pos{xPos, yPos};
-            Vector2 size{tileWidth * 0.9f, tileHeight * 0.9f};
 
             switch (c) {
                 case 'W': {
@@ -230,7 +228,7 @@ void World::generateArena() {
     }
 }
 
-void World::handleCollisions() {
+void World::handleCollisions() const {
     std::vector<std::shared_ptr<Character>> characters;
     std::vector<std::shared_ptr<Wall>> walls;
     std::vector<std::shared_ptr<Bomb>> bombs;

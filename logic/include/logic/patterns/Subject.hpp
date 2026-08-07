@@ -8,12 +8,7 @@
 namespace bomberman::logic {
 
 /**
- * @brief Abstract Subject interface (Observer design pattern, see section 3.1.1).
- *
- * Fully implemented already: this is generic plumbing that every notifying
- * class (EntityModel and its subclasses) can reuse as-is - you should not
- * need to modify this file.
- *
+ * @brief Abstract Subject interface.
  * Design note: observers are stored as weak_ptr so a Subject never extends
  * an Observer's lifetime. Concretely: whoever creates a View (the
  * ConcreteFactory, see representation/ConcreteFactory.hpp) keeps the

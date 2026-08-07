@@ -16,20 +16,17 @@ struct WallAnimationSet {
 
 WallAnimationSet makeWallAnimationSet(WallSpriteVariant variant);
 
-/// TODO: pick the destructible or indestructible sprite based on
-/// model_->isDestructible() once in the constructor (Walls are static, no
-/// animation needed besides possibly a short "crumble" on BlockDestroyed).
 class WallView : public EntityView {
 public:
-    WallView(std::shared_ptr<const bomberman::logic::Wall> model,
+    WallView(std::shared_ptr<const logic::Wall> model,
              std::shared_ptr<sf::Texture> texture,
              WallAnimationSet animationSet);
 
-    void onNotify(const bomberman::logic::Subject& source, bomberman::logic::EventType event) override; // TODO
-    void draw(sf::RenderWindow& window, const Camera& camera) override; // TODO
+    void onNotify(const logic::Subject& source, logic::EventType event) override;
+    void draw(sf::RenderWindow& window, const Camera& camera) override;
 
 private:
-    std::shared_ptr<const bomberman::logic::Wall> model;
+    std::shared_ptr<const logic::Wall> model;
     sf::Sprite sprite;
     std::shared_ptr<sf::Texture> texture;
     WallAnimationSet animationSet;

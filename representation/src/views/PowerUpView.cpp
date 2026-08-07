@@ -3,7 +3,7 @@
 
 namespace bomberman::representation {
 
-    using bomberman::logic::Stopwatch;
+    using logic::Stopwatch;
 
     namespace {
         constexpr int kPowerUpFrameWidth = 16;
@@ -27,14 +27,14 @@ namespace bomberman::representation {
     }
 
 
-    PowerUpView::PowerUpView(std::shared_ptr<const bomberman::logic::PowerUp> model,
+    PowerUpView::PowerUpView(std::shared_ptr<const logic::PowerUp> model,
                              std::shared_ptr<sf::Texture> texture,
                              std::array<sf::IntRect, 2> animation)
         : model(std::move(model)), texture(std::move(texture)), animationFrames(animation) {
         sprite.setTexture(*this->texture);
     }
 
-    void PowerUpView::onNotify(const bomberman::logic::Subject& /*source*/, bomberman::logic::EventType event) {
+    void PowerUpView::onNotify(const logic::Subject& /*source*/, logic::EventType event) {
     if (event == logic::EventType::PowerUpCollected) {
         markedForRemoval = true;
     }

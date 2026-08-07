@@ -6,8 +6,8 @@ namespace bomberman::logic {
 
 class Character;
 
-/// Abstract base for the three required power-ups (section 2.1,
-/// "Power-ups"). Subclasses only need to implement applyEffect().
+/// Abstract base for the power-ups
+/// Subclasses only need to implement applyEffect().
 class PowerUp : public EntityModel {
 public:
     PowerUp(Vector2 position, Vector2 size) : EntityModel(position, size) {}

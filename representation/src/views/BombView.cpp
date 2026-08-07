@@ -20,24 +20,24 @@ namespace bomberman::representation {
             return {left, top, kExplosionFrameWidth, kExplosionFrameHeight};
         }
 
-        std::size_t dirIndex(bomberman::logic::Direction direction) {
+        std::size_t dirIndex(logic::Direction direction) {
             switch (direction) {
-                case bomberman::logic::Direction::Up: return 0;
-                case bomberman::logic::Direction::Down: return 1;
-                case bomberman::logic::Direction::Left: return 2;
-                case bomberman::logic::Direction::Right: return 3;
-                case bomberman::logic::Direction::None: break;
+                case logic::Direction::Up: return 0;
+                case logic::Direction::Down: return 1;
+                case logic::Direction::Left: return 2;
+                case logic::Direction::Right: return 3;
+                case logic::Direction::None: break;
             }
             return 1;
         }
 
-        bomberman::logic::Vector2 stepOffset(bomberman::logic::Direction direction, float step) {
+        logic::Vector2 stepOffset(logic::Direction direction, float step) {
             switch (direction) {
-                case bomberman::logic::Direction::Up: return {0.f, -step};
-                case bomberman::logic::Direction::Down: return {0.f, step};
-                case bomberman::logic::Direction::Left: return {-step, 0.f};
-                case bomberman::logic::Direction::Right: return {step, 0.f};
-                case bomberman::logic::Direction::None: break;
+                case logic::Direction::Up: return {0.f, -step};
+                case logic::Direction::Down: return {0.f, step};
+                case logic::Direction::Left: return {-step, 0.f};
+                case logic::Direction::Right: return {step, 0.f};
+                case logic::Direction::None: break;
             }
             return {0.f, 0.f};
         }
@@ -84,7 +84,7 @@ namespace bomberman::representation {
         return {bombFrames, center, endUp, endDown, endLeft, endRight, bodyVertical, bodyHorizontal};
     }
 
-    BombView::BombView(std::shared_ptr<const bomberman::logic::Bomb> model,
+    BombView::BombView(std::shared_ptr<const logic::Bomb> model,
                        std::shared_ptr<sf::Texture> texture,
                        BombAnimationSet animations)
         : model(std::move(model)), texture(std::move(texture)), animations(std::move(animations)) {
@@ -125,9 +125,9 @@ namespace bomberman::representation {
         }
     }
 
-    void BombView::onNotify(const bomberman::logic::Subject& source, bomberman::logic::EventType event) {
+    void BombView::onNotify(const logic::Subject& source, logic::EventType event) {
         (void)source;
-        if (event == bomberman::logic::EventType::BombExploded && phase != Phase::Done) {
+        if (event == logic::EventType::BombExploded && phase != Phase::Done) {
             phase = Phase::Explosion;
             explosionFrameTimer = 0.f;
             explosionFrameIndex = 0;
@@ -135,7 +135,7 @@ namespace bomberman::representation {
     }
 
     void BombView::drawFrame(sf::RenderWindow& window, const Camera& camera,
-                             const sf::IntRect& frame, const bomberman::logic::Vector2& worldPos) const {
+                             const sf::IntRect& frame, const logic::Vector2& worldPos) const {
         const auto screenPos = camera.worldToScreen(worldPos);
         const auto screenSize = camera.worldSizeToScreen(model->getSize());
 
@@ -163,7 +163,7 @@ namespace bomberman::representation {
 
         drawFrame(window, camera, animations.center[frameIdx], center);
 
-        const auto drawDirection = [&](bomberman::logic::Direction direction,
+        const auto drawDirection = [&](logic::Direction direction,
                                        const std::array<sf::IntRect, 9>& bodyFrames,
                                        const std::array<sf::IntRect, 9>& endFrames) {
             const std::size_t idx = dirIndex(direction);
@@ -178,10 +178,10 @@ namespace bomberman::representation {
             }
         };
 
-        drawDirection(bomberman::logic::Direction::Up, animations.bodyVertical, animations.endUp);
-        drawDirection(bomberman::logic::Direction::Down, animations.bodyVertical, animations.endDown);
-        drawDirection(bomberman::logic::Direction::Left, animations.bodyHorizontal, animations.endLeft);
-        drawDirection(bomberman::logic::Direction::Right, animations.bodyHorizontal, animations.endRight);
+        drawDirection(logic::Direction::Up, animations.bodyVertical, animations.endUp);
+        drawDirection(logic::Direction::Down, animations.bodyVertical, animations.endDown);
+        drawDirection(logic::Direction::Left, animations.bodyHorizontal, animations.endLeft);
+        drawDirection(logic::Direction::Right, animations.bodyHorizontal, animations.endRight);
     }
 
 } // namespace bomberman::representation

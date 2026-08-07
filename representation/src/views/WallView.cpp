@@ -3,11 +3,11 @@
 
 namespace bomberman::representation {
 
-    using bomberman::logic::EventType;
-    using bomberman::logic::Stopwatch;
-    using bomberman::logic::Subject;
-    using bomberman::logic::Vector2;
-    using bomberman::logic::Wall;
+    using logic::EventType;
+    using logic::Stopwatch;
+    using logic::Subject;
+    using logic::Vector2;
+    using logic::Wall;
 
     namespace {
         constexpr int kWallFrameWidth = 16;

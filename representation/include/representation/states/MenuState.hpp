@@ -5,12 +5,6 @@
 
 namespace bomberman::representation {
 
-    /**
-     * @brief TODO: display the top-5 scoreboard (Score::getTopFive(), loaded via
-     * Score::loadHighScores() when this state is entered - section 2.1, "Game
-     * startup & Initialization") and a "Play" button. On click,
-     * manager_.changeState(std::make_unique<PlayState>(manager_)).
-     */
     class MenuState : public State {
     public:
         using State::State;

@@ -13,18 +13,18 @@ PlayState::PlayState(StateManager& manager)
       score(logic::Score::getInstance()),
       factory(std::make_shared<ConcreteFactory>()),
       world(factory),
-      camera(800, 800) { // TODO: pass in the real window size instead of hardcoding it.
+      camera(900, 690) {
     world.initialize();
 }
 
 namespace {
-    bomberman::logic::Direction keyToDirection(sf::Keyboard::Key key) {
+    logic::Direction keyToDirection(sf::Keyboard::Key key) {
         switch (key) {
-            case sf::Keyboard::Up: return bomberman::logic::Direction::Up;
-            case sf::Keyboard::Down: return bomberman::logic::Direction::Down;
-            case sf::Keyboard::Left: return bomberman::logic::Direction::Left;
-            case sf::Keyboard::Right: return bomberman::logic::Direction::Right;
-            default: return bomberman::logic::Direction::None;
+            case sf::Keyboard::Up: return logic::Direction::Up;
+            case sf::Keyboard::Down: return logic::Direction::Down;
+            case sf::Keyboard::Left: return logic::Direction::Left;
+            case sf::Keyboard::Right: return logic::Direction::Right;
+            default: return logic::Direction::None;
         }
     }}
 
@@ -39,15 +39,15 @@ void PlayState::handleEvent(const sf::Event& event) {
         }
 
         const auto direction = keyToDirection(event.key.code);
-        if (direction != bomberman::logic::Direction::None) {
+        if (direction != logic::Direction::None) {
             movementDirection = direction;
             player->setMovementInput(direction);
         }
     } else if (event.type == sf::Event::KeyReleased) {
         const auto direction = keyToDirection(event.key.code);
-        if (direction != bomberman::logic::Direction::None && movementDirection == direction) {
-            movementDirection = bomberman::logic::Direction::None;
-            player->setMovementInput(bomberman::logic::Direction::None);
+        if (direction != logic::Direction::None && movementDirection == direction) {
+            movementDirection = logic::Direction::None;
+            player->setMovementInput(logic::Direction::None);
         }
     }
 }

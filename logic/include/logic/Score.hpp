@@ -15,7 +15,7 @@ struct HighScoreEntry {
 
 /**
  * @brief Observer that turns game events into a score, and persists the
- * top-5 high scores to disk between runs (section 3.1, "Score").
+ * top-5 high scores to disk between runs.
  *
  */
 class Score : public Observer {

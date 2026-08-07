@@ -11,9 +11,9 @@ Game::Game() : window(sf::VideoMode(900, 690), "Bomberman", sf::Style::Titlebar 
 
 void Game::run() {
     while (window.isOpen()) {
-        bomberman::logic::Stopwatch::getInstance().tick();
+        logic::Stopwatch::getInstance().tick();
         processEvents();
-        update(bomberman::logic::Stopwatch::getInstance().getDeltaTime());
+        update(logic::Stopwatch::getInstance().getDeltaTime());
         render();
     }
 }
@@ -29,7 +29,7 @@ void Game::processEvents() {
     }
 }
 
-void Game::update(float deltaTime) {
+void Game::update(float deltaTime) const {
     stateManager.update(deltaTime);
 }
 

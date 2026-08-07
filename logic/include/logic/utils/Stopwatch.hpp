@@ -5,11 +5,8 @@
 namespace bomberman::logic {
 
 /**
- * @brief Singleton (see section 3.1.1) that tracks the time (in seconds)
- * between two consecutive update steps ("deltaTime"). Fully implemented -
- * you should not need to change this class: call tick() once per frame from
- * Game's main loop, and getDeltaTime() everywhere you need to scale
- * movement/timers so the game runs at the same speed on any device.
+ * @brief Singleton that tracks the time (in seconds)
+ * between two consecutive update steps ("deltaTime").
  *
  * Uses std::chrono::steady_clock (never system_clock, which can jump when
  * the system time changes) instead of sf::Clock, as required in section 3.1.

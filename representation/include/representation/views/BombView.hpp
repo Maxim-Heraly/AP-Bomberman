@@ -21,20 +21,14 @@ struct BombAnimationSet {
 
 BombAnimationSet makeBombAnimationSet();
 
-/**
- * @brief TODO:
- *   - onNotify(): play the "ticking" animation as the fuse counts down
- *     (section 2.2, "An animation should play when each bomb ticks down"),
- *     then switch to the explosion animation on BombExploded.
- *   - draw(): position via camera.worldToScreen(model_->getPosition()).
- */
+
 class BombView : public EntityView {
 public:
-    BombView(std::shared_ptr<const bomberman::logic::Bomb> model,
+    BombView(std::shared_ptr<const logic::Bomb> model,
              std::shared_ptr<sf::Texture> texture,
              BombAnimationSet animations);
 
-    void onNotify(const bomberman::logic::Subject& source, bomberman::logic::EventType event) override;
+    void onNotify(const logic::Subject& source, logic::EventType event) override;
     void draw(sf::RenderWindow& window, const Camera& camera) override;
     void update(float deltaTime) override;
 
@@ -42,9 +36,9 @@ private:
     enum class Phase { Fuse, Explosion, Done };
 
     void drawFrame(sf::RenderWindow& window, const Camera& camera,
-                   const sf::IntRect& frame, const bomberman::logic::Vector2& worldPos) const;
+                   const sf::IntRect& frame, const logic::Vector2& worldPos) const;
 
-    std::shared_ptr<const bomberman::logic::Bomb> model;
+    std::shared_ptr<const logic::Bomb> model;
     std::shared_ptr<sf::Texture> texture;
     BombAnimationSet animations;
     mutable sf::Sprite sprite;

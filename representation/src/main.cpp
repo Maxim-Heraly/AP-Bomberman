@@ -4,7 +4,7 @@
 
 int main() {
     // Wrapping the whole game in a try/catch means a fatal startup problem
-    // (e.g. a missing/corrupt font or spritesheet file
+    // (e.g. a missing/corrupt font or spritesheet file)
     try {
         bomberman::representation::Game game;
         game.run();

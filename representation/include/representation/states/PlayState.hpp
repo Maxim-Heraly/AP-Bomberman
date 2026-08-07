@@ -25,10 +25,10 @@ public:
 
 private:
     std::shared_ptr<ConcreteFactory> factory;
-    bomberman::logic::World world;
-    std::shared_ptr<bomberman::logic::Score> score;
+    logic::World world;
+    std::shared_ptr<logic::Score> score;
     Camera camera;
-    bomberman::logic::Direction movementDirection{bomberman::logic::Direction::None};
+    logic::Direction movementDirection{logic::Direction::None};
     float timer{0.0f};
 };
 

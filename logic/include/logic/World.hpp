@@ -1,7 +1,6 @@
 #pragma once
 
 #include "logic/patterns/AbstractFactory.hpp"
-#include "logic/utils/Vector2.hpp"
 #include "Score.hpp"
 #include <memory>
 #include <vector>
@@ -17,10 +16,7 @@ class Score;
 
 /**
  * @brief Owns every EntityModel currently in the arena and orchestrates
- * their interactions. This is the biggest class in the logic library - take
- * your time designing it, and consider splitting responsibilities into
- * smaller collaborator classes (e.g. an ArenaGenerator or a CollisionSystem)
- * if World starts feeling like it's doing too much.
+ * their interactions.
  *
  * TODO (section 2.1, "Enemies and AI"):
  *   - call Bot::decideNextMove(*this) for every Bot before updating them.
@@ -35,7 +31,6 @@ public:
 
     [[nodiscard]] const std::vector<std::shared_ptr<EntityModel>>& getEntities() const { return entities; }
     [[nodiscard]] std::shared_ptr<Character> getPlayer() const { return player; }
-    std::shared_ptr<Score> getPlayerScore() const;
 
     void placeBomb(Character& owner);
 
@@ -43,7 +38,7 @@ public:
 
 private:
     void generateArena();
-    void handleCollisions();
+    void handleCollisions() const;
     void explode(Bomb& bomb);
 
     std::shared_ptr<AbstractFactory> factory;

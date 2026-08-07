@@ -14,16 +14,12 @@ class PowerUp;
 enum class PowerUpType { Fire, ExtraBomb, Skates };
 
 /**
- * @brief Abstract Factory (design pattern, see section 3.1.1) interface,
+ * @brief Abstract Factory interface,
  * defined in the logic library so World can create new entities without
  * knowing anything about SFML. The representation library provides a
  * ConcreteFactory implementing these methods: for every Model it creates,
  * it should also construct the matching View and attach() it as an Observer
  * (see Subject.hpp) before returning the Model to World.
- *
- * TODO: adjust these signatures as your Character/Bomb/etc. constructors
- * need more parameters (e.g. an enum to distinguish Player vs Bot, or a
- * concrete Bot "personality" for the smarter-bots bonus in section 2.3).
  */
 class AbstractFactory {
 public:
