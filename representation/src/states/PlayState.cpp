@@ -77,6 +77,29 @@ void PlayState::render(sf::RenderWindow& window) {
     }
     ScoreView scoreView(logic::Score::getInstance());
     scoreView.draw(window, 10, 10);
+
+    // only show when game is over
+    if (!world.isGameOver()) {
+        return;
+    }
+
+    sf::Font font;
+    if (!font.loadFromFile("../../assets/fonts/PublicPixel-rv0pA.ttf")) {
+        std::printf("Failed to load font\n");
+        return;
+    }
+
+    const float centerX = static_cast<float>(windowSize.x) * 0.5f;
+    const float centerY = static_cast<float>(windowSize.y) * 0.5f;
+    const auto player = world.getPlayer();
+    const bool won = player && player->isAlive();
+    sf::Text resultText(won ? "YOU WIN!" : "GAME OVER", font, 48);
+    resultText.setFillColor(won ? sf::Color::Yellow : sf::Color::Red);
+    resultText.setStyle(sf::Text::Bold);
+    const auto bounds = resultText.getLocalBounds();
+    resultText.setOrigin(bounds.left + bounds.width * 0.5f, bounds.top + bounds.height * 0.5f);
+    resultText.setPosition(centerX, centerY);
+    window.draw(resultText);
 }
 
 } // namespace bomberman::representation
