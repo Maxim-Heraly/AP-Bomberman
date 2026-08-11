@@ -2,7 +2,6 @@
 #include "representation/states/MenuState.hpp"
 #include "logic/entities/Character.hpp"
 #include "representation/states/StateManager.hpp"
-#include "logic/utils/Stopwatch.hpp"
 #include "representation/views/ScoreView.hpp"
 #include "logic/Score.hpp"
 

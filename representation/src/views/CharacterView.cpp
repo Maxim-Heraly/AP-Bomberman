@@ -74,7 +74,9 @@ CharacterAnimationSet makeCharacterAnimationSet(CharacterSpriteVariant variant) 
                 Frames4{rect(196, 72), rect(213, 72), rect(230, 72), rect(213, 72)}
             },
             Frames12{},
-            Frames12{});
+            Frames12{rect(196, 160), rect(213, 160), rect(230, 160), rect(247, 160),
+                     rect(264, 160), rect(281, 160), rect(298, 160), rect(298, 160),
+                     rect(298, 160), rect(298, 160), rect(298, 160), rect(298, 160)});
 
         case CharacterSpriteVariant::Bot2:
             return makeSet(
@@ -91,7 +93,9 @@ CharacterAnimationSet makeCharacterAnimationSet(CharacterSpriteVariant variant) 
                 Frames4{rect(3, 330), rect(20, 330), rect(37, 330), rect(20, 330)}
             },
             Frames12{},
-            Frames12{});
+            Frames12{rect(3, 418), rect(20, 418), rect(37, 418), rect(54, 418),
+                     rect(71, 418), rect(88, 418), rect(105, 418), rect(105, 418),
+                     rect(105, 418), rect(105, 418), rect(105, 418), rect(105, 418)});
 
         case CharacterSpriteVariant::Bot3:
             return makeSet(
@@ -108,7 +112,9 @@ CharacterAnimationSet makeCharacterAnimationSet(CharacterSpriteVariant variant) 
                 Frames4{rect(196, 330), rect(213, 330), rect(230, 330), rect(213, 330)}
             },
             Frames12{},
-            Frames12{});
+            Frames12{rect(196, 418), rect(213, 418), rect(230, 418), rect(247, 418),
+                     rect(264, 418), rect(281, 418), rect(298, 418), rect(298, 418),
+                     rect(298, 418), rect(298, 418), rect(298, 418), rect(298, 418)})
     ;}
 
     return makeSet(Frames4{rect(0, 0), rect(0, 0), rect(0, 0), rect(0, 0)},
