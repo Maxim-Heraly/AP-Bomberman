@@ -6,6 +6,7 @@ namespace bomberman::representation {
 namespace {
     constexpr int kFrameWidth = 16;
     constexpr int kFrameHeight = 24;
+    constexpr int kWinFrameHeight = 40;
     constexpr float kFrameSeconds = 0.12f;
 
     using Frames4 = std::array<sf::IntRect, 4>;
@@ -14,6 +15,9 @@ namespace {
 
     sf::IntRect rect(int left, int top) {
         return {left, top, kFrameWidth, kFrameHeight};
+    }
+    sf::IntRect winRect(int left, int top) {
+        return {left, top, kFrameWidth, kWinFrameHeight};
     }
 
     std::size_t dirIndex(logic::Direction direction) {
@@ -49,9 +53,9 @@ CharacterAnimationSet makeCharacterAnimationSet(CharacterSpriteVariant variant) 
                     Frames4{rect(3, 72), rect(20, 72), rect(37, 72), rect(20, 72)}
                 },
                 Frames12{
-                    rect(3, 197), rect(20, 197), rect(37, 197), rect(54, 197),
-                    rect(71, 197), rect(88, 197), rect(105, 197), rect(88, 197),
-                    rect(71, 197), rect(54, 197), rect(37, 197), rect(20, 197)
+                    winRect(3, 197), winRect(20, 197), winRect(37, 197), winRect(54, 197),
+                    winRect(71, 197), winRect(88, 197), winRect(105, 197), winRect(88, 197),
+                    winRect(71, 197), winRect(54, 197), winRect(37, 197), winRect(20, 197)
                 },
                 Frames12{
                     rect(3, 160), rect(20, 160), rect(37, 160), rect(54, 160),
@@ -214,10 +218,14 @@ void CharacterView::draw(sf::RenderWindow& window, const Camera& camera) {
             : animationSet.idle[facingIdx];
 
     sprite.setTextureRect(frame);
-    sprite.setOrigin(frame.width * 0.5f, frame.height * 0.5f);
+    if (!won) {
+        sprite.setOrigin(frame.width * 0.5f, frame.height * 0.5f);
+    } else{
+        sprite.setOrigin(frame.width * 0.5f, kFrameHeight);
+    }
     sprite.setPosition(screenPos.x, screenPos.y);
-    sprite.setScale(screenSize.x / static_cast<float>(frame.width),
-                    screenSize.y / static_cast<float>(frame.height));
+    sprite.setScale(screenSize.x / static_cast<float>(kFrameWidth),
+                    screenSize.y / static_cast<float>(kFrameHeight));
 
     window.draw(sprite);
 }
