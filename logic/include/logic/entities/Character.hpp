@@ -33,6 +33,7 @@ public:
     }
 
     void revertToPreviousPosition() { position = previousPosition; }
+    [[nodiscard]] const Vector2& getPreviousPosition() const { return previousPosition; }
 
     void die() {
         if (!alive) return;

@@ -5,6 +5,7 @@
 #include "logic/entities/PowerUp.hpp"
 #include "logic/entities/Wall.hpp"
 #include "logic/utils/Random.hpp"
+#include "logic/utils/Grid.hpp"
 #include <algorithm>
 #include <fstream>
 #include <sstream>
@@ -21,6 +22,17 @@ namespace {
         }
         const auto owner = bomb->getOwner().lock();
         return owner && owner == character;
+    }
+
+    bool aabbOverlap(const Vector2& posA, const Vector2& sizeA, const Vector2& posB, const Vector2& sizeB) {
+        const bool overlapX = std::abs(posA.x - posB.x) < (sizeA.x + sizeB.x) * 0.5f;
+        const bool overlapY = std::abs(posA.y - posB.y) < (sizeA.y + sizeB.y) * 0.5f;
+        return overlapX && overlapY;
+    }
+
+    bool wasAlreadyOverlappingBomb(const std::shared_ptr<Character>& character, const std::shared_ptr<Bomb>& bomb) {
+        return aabbOverlap(character->getPreviousPosition(), character->getSize(),
+                           bomb->getPosition(), bomb->getSize());
     }
 
     std::size_t dirIndex(Direction direction) {
@@ -279,6 +291,9 @@ void World::handleCollisions() const {
         if (!blocked) {
             for (const auto& bomb : bombs) {
                 if (isOwnedBombPassThrough(character, bomb)) {
+                    continue;
+                }
+                if (wasAlreadyOverlappingBomb(character, bomb)) {
                     continue;
                 }
 
