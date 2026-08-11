@@ -90,6 +90,7 @@ void World::update(float deltaTime) {
                 bot->decideNextMove(*this);
             }
         }
+    }
 
         for (const auto& entity : entities) {
             entity->update(deltaTime);
@@ -116,7 +117,7 @@ void World::update(float deltaTime) {
             entities.end());
 
         if (!gameOver && !player->isAlive()) {
-            score->addPlayerLost();
+            player->declareLoss();
             gameOver = true;
         }
 
@@ -130,11 +131,10 @@ void World::update(float deltaTime) {
                 }
             }
             if (!anyBotsAlive) {
-                score->addPlayerWon();
+                player->declareWin();
                 gameOver = true;
             }
         }
-    }
 }
 
 void World::placeBomb(Character& owner) {

@@ -60,7 +60,7 @@ void PlayState::update(float deltaTime) {
     }
 
     if (world.isGameOver()) {
-        timer += logic::Stopwatch::getInstance().getDeltaTime();
+        timer += deltaTime;
         if (timer >= 5.0f) {
             score->saveHighScores("../../highscores.txt");
             manager.changeState(std::make_unique<MenuState>(manager));

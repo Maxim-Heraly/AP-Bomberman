@@ -12,6 +12,8 @@ enum class CharacterSpriteVariant {Player, Bot1, Bot2, Bot3};
 struct CharacterAnimationSet {
     std::array<sf::IntRect, 4> idle;
     std::array<std::array<sf::IntRect, 4>, 4> walk; // [direction][frame]
+    std::array<sf::IntRect, 12> win;
+    std::array<sf::IntRect, 12> dead;
 };
 
 CharacterAnimationSet makeCharacterAnimationSet(CharacterSpriteVariant variant);
@@ -27,6 +29,9 @@ public:
     void onNotify(const logic::Subject& source, logic::EventType event) override;
     void draw(sf::RenderWindow& window, const Camera& camera) override;
 
+    void setWon();
+    void setDead();
+
 private:
     std::shared_ptr<const logic::Character> model;
     sf::Sprite sprite;
@@ -36,6 +41,8 @@ private:
     float frameTimer{0.f};
     std::size_t frameIndex{0};
     logic::Direction lastFacing{logic::Direction::Down};
+    bool won{false};
+    bool dead{false};
 };
 
 } // namespace bomberman::representation
