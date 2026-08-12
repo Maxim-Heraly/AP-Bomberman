@@ -38,6 +38,24 @@ namespace {
         return {0.f, 0.f};
     }
 
+    // Snaps a position to the center of whichever tile it currently sits
+    // in - the same rounding World::placeBomb() uses. A Bot only ever
+    // moves along one axis at a time (see Character::update), so the
+    // *other* axis never gets a chance to self-correct: a Bot that moved
+    // vertically for a while and then turns to move horizontally keeps
+    // whatever fractional Y offset it had. That's fine for the physics,
+    // but it's poison for a *one-tile-ahead* candidate check - corridors
+    // here are almost exactly as wide as the Bot's own body, so a few
+    // ticks of accumulated drift is enough for a "one tile over" guess to
+    // clip a diagonally-adjacent pillar that a perfectly-centered Bot
+    // would have cleared, making every direction look blocked. Anchoring
+    // candidate generation to the intended tile center avoids that.
+    Vector2 roundToTileCenter(const Vector2& pos) {
+        const float x = -1.f + (std::round((pos.x + 1.f - kTileWidth * 0.5f) / kTileWidth) + 0.5f) * kTileWidth;
+        const float y = -1.f + (std::round((pos.y + 1.f - kTileHeight * 0.5f) / kTileHeight) + 0.5f) * kTileHeight;
+        return {x, y};
+    }
+
     float squaredDistance(const Vector2& a, const Vector2& b) {
         const float dx = a.x - b.x;
         const float dy = a.y - b.y;
@@ -107,27 +125,56 @@ bool Bot::isEnemyClose(const World& world) const {
     return false;
 }
 
-Direction Bot::directionTowards(const Vector2& target) const {
+bool Bot::moveTowards(World& world, const Vector2& target) {
     const float dx = target.x - position.x;
     const float dy = target.y - position.y;
-    if (std::abs(dx) < kEpsilonX && std::abs(dy) < kEpsilonY) return Direction::None;
+    if (std::abs(dx) < kEpsilonX && std::abs(dy) < kEpsilonY) return false; // Already there.
 
-    // Only one cardinal direction can be requested at a time - close the
-    // bigger gap first, the other axis catches up over the next ticks.
-    if (std::abs(dx) > std::abs(dy)) {
-        return dx > 0.f ? Direction::Right : Direction::Left;
+    const Vector2 anchor = roundToTileCenter(position);
+
+    // Rank all four directions by how much each would reduce the remaining
+    // distance to the target (most direct first). A fixed "primary, then
+    // secondary" pair isn't enough: whenever the target is exactly on one
+    // axis (very common - e.g. lining up with a wall or an enemy to bomb
+    // it), there IS no secondary axis, so a single blocked direction left
+    // the Bot with nothing else to try and it just froze. Ranking all four
+    // lets it sidestep around a pillar instead - essential in this
+    // checkerboard maze, where a straight line to the target is rarely
+    // walkable.
+    std::array<Direction, 4> ranked = kDirections;
+    std::sort(ranked.begin(), ranked.end(), [&](Direction a, Direction b) {
+        auto progress = [&](Direction dir) {
+            switch (dir) {
+                case Direction::Up:    return -dy;
+                case Direction::Down:  return dy;
+                case Direction::Left:  return -dx;
+                case Direction::Right: return dx;
+                default: return -std::numeric_limits<float>::max();
+            }
+        };
+        return progress(a) > progress(b);
+    });
+
+    for (Direction direction : ranked) {
+        const Vector2 candidate = anchor + stepOffset(direction);
+        if (isTileBlocked(world, candidate)) continue;
+        if (isTileDangerous(world, candidate)) continue; // Don't detour through a live blast.
+
+        setMovementInput(direction);
+        return true;
     }
-    return dy > 0.f ? Direction::Down : Direction::Up;
+    return false;
 }
 
 bool Bot::tryFlee(World& world) {
     if (!isTileDangerous(world, position)) return false;
 
+    const Vector2 anchor = roundToTileCenter(position);
     Direction best = Direction::None;
     float bestScore = -std::numeric_limits<float>::max();
 
     for (Direction direction : kDirections) {
-        const Vector2 candidate = position + stepOffset(direction);
+        const Vector2 candidate = anchor + stepOffset(direction);
         if (isTileBlocked(world, candidate)) continue;
 
         const bool safe = !isTileDangerous(world, candidate);
@@ -177,14 +224,7 @@ bool Bot::tryCollectPowerUp(World& world) {
     }
     if (!nearest) return false;
 
-    const Direction direction = directionTowards(nearest->getPosition());
-    if (direction == Direction::None) return false;
-    const Vector2 candidate = position + stepOffset(direction);
-    if (isTileBlocked(world, candidate)) return false;
-    if (isTileDangerous(world, candidate)) return false; // Don't detour through a live blast for a power-up.
-
-    setMovementInput(direction);
-    return true;
+    return moveTowards(world, nearest->getPosition());
 }
 
 bool Bot::tryBreakWalls(World& world) {
@@ -207,14 +247,7 @@ bool Bot::tryBreakWalls(World& world) {
         return true; // tryFlee() steers the Bot away from its own bomb next tick.
     }
 
-    const Direction direction = directionTowards(nearest->getPosition());
-    if (direction == Direction::None) return false;
-    const Vector2 candidate = position + stepOffset(direction);
-    if (isTileBlocked(world, candidate)) return false;
-    if (isTileDangerous(world, candidate)) return false; // Don't walk into a live blast chasing a wall.
-
-    setMovementInput(direction);
-    return true;
+    return moveTowards(world, nearest->getPosition());
 }
 
 bool Bot::tryAttack(World& world) {
@@ -237,14 +270,7 @@ bool Bot::tryAttack(World& world) {
         return true;
     }
 
-    const Direction direction = directionTowards(target->getPosition());
-    if (direction == Direction::None) return false;
-    const Vector2 candidate = position + stepOffset(direction);
-    if (isTileBlocked(world, candidate)) return false;
-    if (isTileDangerous(world, candidate)) return false; // Don't walk into a live blast chasing an enemy.
-
-    setMovementInput(direction);
-    return true;
+    return moveTowards(world, target->getPosition());
 }
 
 void Bot::decideNextMove(World& world) {

@@ -40,7 +40,13 @@ namespace bomberman::logic {
         [[nodiscard]] bool isTileDangerous(const World& world, const Vector2& tile) const;
         [[nodiscard]] bool isTileBlocked(const World& world, const Vector2& tile) const;
         [[nodiscard]] bool isInLineWithinRange(const Vector2& from, const Vector2& target, int range) const;
-        [[nodiscard]] Direction directionTowards(const Vector2& target) const;
+        /// Steps one tile toward `target`, closing whichever axis has the
+        /// bigger gap first but falling back to the other axis if that
+        /// direction turns out to be blocked or dangerous - so a single
+        /// obstructed axis doesn't leave the Bot standing still. Returns
+        /// false (and leaves movement input untouched) only if neither axis
+        /// offers a usable step.
+        bool moveTowards(World& world, const Vector2& target);
     };
 
 } // namespace bomberman::logic
