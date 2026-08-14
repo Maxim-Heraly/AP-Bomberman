@@ -1,22 +1,26 @@
+// logic/include/logic/entities/Bot.hpp
 #pragma once
 
 #include "logic/entities/Character.hpp"
 
 namespace bomberman::logic {
 
-    class World; // Forward declaration only - see decideNextMove().
+    class World;
 
     /**
      * @brief Computer-controlled Character behaviour: a priority list
      * re-evaluated every tick by decideNextMove().
      *
-     *   1. Flee any Bomb whose blast would currently reach this Bot.
+     *   1. Flee any Bomb whose blast would currently reach this Bot. A
+     *      breadth-first search over the arena grid finds the *nearest*
+     *      safe tile, even if that takes several steps through the arena's
+     *      1-wide corridors.
      *   2. Chase down any nearby PowerUp.
-     *   3. If an enemy Character is very close, attack instead of detouring
-     *      to a wall.
-     *   4. Otherwise, hunt down and bomb the nearest destructible Wall.
-     *   5. Once no destructible Walls are left (or nothing else applies),
+     *   3. Otherwise, hunt down and bomb the nearest destructible Wall.
+     *   4. Once no destructible Walls are left (or nothing else applies),
      *      fall back to attacking the nearest Character.
+     *   5. If nothing above applies, wander into a random open neighbour
+     *      tile instead of standing still.
      *
      * Each helper below returns true once it has decided on an action for
      * this tick, so decideNextMove() just chains them in priority order.
@@ -25,9 +29,9 @@ namespace bomberman::logic {
     public:
         Bot(Vector2 position, Vector2 size) : Character(position, size) {}
 
-        /// Called once per tick (by World::update(), before update()) -
-        /// inspects the World and calls setMovementInput()/requests a bomb
-        /// placement accordingly.
+        /// Called once per tick (by World::update(), before entities are
+        /// updated) - inspects the World and calls setMovementInput() /
+        /// World::placeBomb() accordingly.
         void decideNextMove(World& world);
 
     private:
@@ -36,17 +40,67 @@ namespace bomberman::logic {
         bool tryBreakWalls(World& world);
         bool tryAttack(World& world);
 
-        [[nodiscard]] bool isEnemyClose(const World& world) const;
-        [[nodiscard]] bool isTileDangerous(const World& world, const Vector2& tile) const;
-        [[nodiscard]] bool isTileBlocked(const World& world, const Vector2& tile) const;
-        [[nodiscard]] bool isInLineWithinRange(const Vector2& from, const Vector2& target, int range) const;
-        /// Steps one tile toward `target`, closing whichever axis has the
-        /// bigger gap first but falling back to the other axis if that
-        /// direction turns out to be blocked or dangerous - so a single
-        /// obstructed axis doesn't leave the Bot standing still. Returns
-        /// false (and leaves movement input untouched) only if neither axis
-        /// offers a usable step.
-        bool moveTowards(World& world, const Vector2& target);
+        /// Points this Bot one grid step towards (targetCol, targetRow),
+        /// preferring whichever axis currently has the bigger gap; falls
+        /// back to the other axis if that direction turns out to be
+        /// blocked or dangerous. Returns false if no useful step is
+        /// available (and tries recenteringDirection() as a last resort).
+        bool stepToward(World& world, int targetCol, int targetRow);
+
+        /// Fine-grained final approach towards an exact world position -
+        /// used once this Bot is already standing in a PowerUp's own grid
+        /// cell, since World::handleCollisions() only actually grants the
+        /// pickup once the (continuous) hitboxes truly overlap.
+        void chaseExactPosition(Vector2 targetPosition);
+
+        /// Wander into a random open neighbour when nothing higher-priority
+        /// needs doing. Commits to the chosen direction (via
+        /// wanderDirection) across ticks instead of re-rolling a fresh
+        /// random direction every single frame, which would otherwise make
+        /// idle Bots jitter in place rather than actually wandering.
+        void wander(World& world);
+
+        /// Breadth-first search over walkable grid tiles, starting from
+        /// (startCol, startRow), for the nearest tile where this Bot would
+        /// not be caught in any live Bomb's blast. Returns the direction of
+        /// the first step of that shortest path, or Direction::None if no
+        /// safe tile is reachable at all.
+        [[nodiscard]] Direction findEscapeDirection(const World& world, int startCol, int startRow) const;
+
+        /// True if (col, row) is inside the arena and has no Wall or live
+        /// Bomb standing on it.
+        [[nodiscard]] bool isWalkable(const World& world, int col, int row) const;
+
+        /// Like isWalkable(), but tests this Bot's REAL current (continuous,
+        /// possibly off-tile-center) hitbox against every Wall/Bomb using the
+        /// same axis-aligned overlap test World::handleCollisions() uses -
+        /// rather than comparing rounded grid cells, which silently assumes
+        /// a perfectly-centered Bot. See the .cpp for why that assumption
+        /// can be wrong and leave a Bot stuck standing on its own Bomb.
+        [[nodiscard]] bool isImmediateStepSafe(const World& world, Direction direction) const;
+
+        /// Like isWalkable(), but also refuses any currently-dangerous
+        /// tile. Used everywhere except findEscapeDirection()'s BFS, which
+        /// needs to be able to path *through* a dangerous tile to reach a
+        /// safe one on the other side of it.
+        [[nodiscard]] bool isSafeToStepInto(const World& world, int col, int row) const;
+
+        /// Fallback used whenever every direction otherwise looks blocked:
+        /// returns the direction that nudges this Bot back towards the
+        /// center of whichever tile it currently (per worldToGridCoords)
+        /// occupies, or Direction::None if it's already centered within a
+        /// small tolerance. See the .cpp for why a Bot can end up needing
+        /// this - and why it's always safe to try even without an explicit
+        /// walkability check.
+        [[nodiscard]] Direction recenteringDirection() const;
+
+        /// The direction chosen by the most recent tryFlee() call - a Bot
+        /// commits to an escape route instead of recomputing (and
+        /// potentially reversing) a brand-new BFS plan every single tick.
+        Direction fleeDirection{Direction::None};
+
+        /// The direction chosen by the most recent wander() call.
+        Direction wanderDirection{Direction::None};
     };
 
 } // namespace bomberman::logic

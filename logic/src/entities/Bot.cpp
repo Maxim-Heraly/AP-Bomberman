@@ -1,294 +1,503 @@
+// logic/src/entities/Bot.cpp
 #include "logic/entities/Bot.hpp"
 #include "logic/World.hpp"
 #include "logic/entities/Bomb.hpp"
 #include "logic/entities/Wall.hpp"
 #include "logic/entities/PowerUp.hpp"
+#include "logic/utils/Random.hpp"
 #include "logic/utils/Grid.hpp"
-#include <algorithm>
 #include <array>
 #include <cmath>
-#include <limits>
+#include <queue>
+#include <set>
+#include <utility>
 
 namespace bomberman::logic {
 
 namespace {
-    // Bot's own movement/detection heuristics need to reason about the same
-    // grid World::generateArena() actually lays tiles out on. The columns
-    // (15) and rows (13) don't divide [-1, 1] into equal steps, so X and Y
-    // need separate step sizes - a single shared "kTileStep" previously
-    // silently drifted away from the real spacing (particularly on the Y
-    // axis), which made the Bot misjudge which tiles were blocked/in range.
-    constexpr float kEpsilonX = kTileWidth * 0.5f;
-    constexpr float kEpsilonY = kTileHeight * 0.5f;
-    constexpr float kAvgTileStep = (kTileWidth + kTileHeight) * 0.5f;
-    constexpr float kPowerUpDetectionRange = 6.f * kAvgTileStep;
-    constexpr float kEnemyCloseRange = 3.f * kAvgTileStep;
-
-    constexpr std::array<Direction, 4> kDirections{
+    constexpr std::array<std::pair<int, int>, 4> kGridOffsets{{{0, -1}, {0, 1}, {-1, 0}, {1, 0}}};
+    constexpr std::array<Direction, 4> kGridDirections{
         Direction::Up, Direction::Down, Direction::Left, Direction::Right};
 
-    Vector2 stepOffset(Direction direction) {
-        switch (direction) {
-            case Direction::Up:    return {0.f, -kTileHeight};
-            case Direction::Down:  return {0.f, kTileHeight};
-            case Direction::Left:  return {-kTileWidth, 0.f};
-            case Direction::Right: return {kTileWidth, 0.f};
-            case Direction::None:  break;
-        }
-        return {0.f, 0.f};
+    constexpr float kEpsilonX = kTileWidth * 0.5f;
+    constexpr float kEpsilonY = kTileHeight * 0.5f;
+
+    // Mirrors World::generateArena()'s tile layout: a kArenaColumns x
+    // kArenaRows grid whose cell centers exactly fill [-1, 1] on both axes.
+    std::pair<int, int> worldToGridCoords(const Vector2& position) {
+        const int col = static_cast<int>(std::round((position.x + 1.f - kTileWidth * 0.5f) / kTileWidth));
+        const int row = static_cast<int>(std::round((position.y + 1.f - kTileHeight * 0.5f) / kTileHeight));
+        return {col, row};
     }
 
-    // Snaps a position to the center of whichever tile it currently sits
-    // in - the same rounding World::placeBomb() uses. A Bot only ever
-    // moves along one axis at a time (see Character::update), so the
-    // *other* axis never gets a chance to self-correct: a Bot that moved
-    // vertically for a while and then turns to move horizontally keeps
-    // whatever fractional Y offset it had. That's fine for the physics,
-    // but it's poison for a *one-tile-ahead* candidate check - corridors
-    // here are almost exactly as wide as the Bot's own body, so a few
-    // ticks of accumulated drift is enough for a "one tile over" guess to
-    // clip a diagonally-adjacent pillar that a perfectly-centered Bot
-    // would have cleared, making every direction look blocked. Anchoring
-    // candidate generation to the intended tile center avoids that.
-    Vector2 roundToTileCenter(const Vector2& pos) {
-        const float x = -1.f + (std::round((pos.x + 1.f - kTileWidth * 0.5f) / kTileWidth) + 0.5f) * kTileWidth;
-        const float y = -1.f + (std::round((pos.y + 1.f - kTileHeight * 0.5f) / kTileHeight) + 0.5f) * kTileHeight;
-        return {x, y};
+    Vector2 gridToWorld(int col, int row) {
+        return {-1.f + kTileWidth * 0.5f + static_cast<float>(col) * kTileWidth,
+                -1.f + kTileHeight * 0.5f + static_cast<float>(row) * kTileHeight};
     }
 
-    float squaredDistance(const Vector2& a, const Vector2& b) {
-        const float dx = a.x - b.x;
-        const float dy = a.y - b.y;
-        return dx * dx + dy * dy;
+    bool inGridBounds(int col, int row) {
+        return col >= 0 && col < kArenaColumns && row >= 0 && row < kArenaRows;
     }
 
-    // True axis-aligned overlap test, mirroring EntityModel::intersects().
-    // isTileBlocked() used to approximate this with a "same tile center,
-    // within half a tile" epsilon check - but that epsilon (~half a tile)
-    // is much *smaller* than the actual collision threshold the physics
-    // uses (half the Bot's width/height plus half the obstacle's, which is
-    // close to a *full* tile). Since Bots move continuously rather than
-    // snapping to the grid, they're almost always slightly off-center, and
-    // that gap let the Bot judge a tile "clear" while World::handleCollisions
-    // still reverted the move as a real collision - so a chosen "escape"
-    // direction could silently fail every single tick.
+    // True axis-aligned overlap test between two arbitrary (position, size)
+    // boxes - mirrors EntityModel::intersects() exactly, so it predicts
+    // World::handleCollisions()'s verdict precisely (see wouldOverlap()'s
+    // use below).
     bool wouldOverlap(const Vector2& posA, const Vector2& sizeA, const Vector2& posB, const Vector2& sizeB) {
         const bool overlapX = std::abs(posA.x - posB.x) < (sizeA.x + sizeB.x) * 0.5f;
         const bool overlapY = std::abs(posA.y - posB.y) < (sizeA.y + sizeB.y) * 0.5f;
         return overlapX && overlapY;
     }
-}
 
-bool Bot::isTileBlocked(const World& world, const Vector2& tile) const {
-    for (const auto& entity : world.getEntities()) {
-        if (!entity->isAlive()) continue;
-        if (auto wall = std::dynamic_pointer_cast<Wall>(entity)) {
-            if (wouldOverlap(tile, size, wall->getPosition(), wall->getSize())) return true;
-        } else if (auto bomb = std::dynamic_pointer_cast<Bomb>(entity)) {
-            if (wouldOverlap(tile, size, bomb->getPosition(), bomb->getSize())) return true;
-        }
-    }
-    return false;
-}
-
-bool Bot::isInLineWithinRange(const Vector2& from, const Vector2& target, int range) const {
-    const bool sameRow = std::abs(from.y - target.y) < kEpsilonY;
-    const bool sameCol = std::abs(from.x - target.x) < kEpsilonX;
-    if (!sameRow && !sameCol) return false;
-
-    // Distance is measured along whichever axis the blast actually travels:
-    // a shared row means the blast reaches along X (tiles spaced kTileWidth
-    // apart), a shared column means it reaches along Y (kTileHeight apart).
-    if (sameRow) {
-        const float distance = std::abs(from.x - target.x);
-        return distance <= kTileWidth * static_cast<float>(range) + kEpsilonX;
-    }
-    const float distance = std::abs(from.y - target.y);
-    return distance <= kTileHeight * static_cast<float>(range) + kEpsilonY;
-}
-
-bool Bot::isTileDangerous(const World& world, const Vector2& tile) const {
-    for (const auto& entity : world.getEntities()) {
-        auto bomb = std::dynamic_pointer_cast<Bomb>(entity);
-        if (!bomb || bomb->hasExploded()) continue;
-        if (isInLineWithinRange(tile, bomb->getPosition(), bomb->getRadius())) return true;
-    }
-    return false;
-}
-
-bool Bot::isEnemyClose(const World& world) const {
-    for (const auto& entity : world.getEntities()) {
-        auto character = std::dynamic_pointer_cast<Character>(entity);
-        if (!character || character.get() == this || !character->isAlive()) continue;
-        if (squaredDistance(position, character->getPosition()) <= kEnemyCloseRange * kEnemyCloseRange) return true;
-    }
-    return false;
-}
-
-bool Bot::moveTowards(World& world, const Vector2& target) {
-    const float dx = target.x - position.x;
-    const float dy = target.y - position.y;
-    if (std::abs(dx) < kEpsilonX && std::abs(dy) < kEpsilonY) return false; // Already there.
-
-    const Vector2 anchor = roundToTileCenter(position);
-
-    // Rank all four directions by how much each would reduce the remaining
-    // distance to the target (most direct first). A fixed "primary, then
-    // secondary" pair isn't enough: whenever the target is exactly on one
-    // axis (very common - e.g. lining up with a wall or an enemy to bomb
-    // it), there IS no secondary axis, so a single blocked direction left
-    // the Bot with nothing else to try and it just froze. Ranking all four
-    // lets it sidestep around a pillar instead - essential in this
-    // checkerboard maze, where a straight line to the target is rarely
-    // walkable.
-    std::array<Direction, 4> ranked = kDirections;
-    std::sort(ranked.begin(), ranked.end(), [&](Direction a, Direction b) {
-        auto progress = [&](Direction dir) {
-            switch (dir) {
-                case Direction::Up:    return -dy;
-                case Direction::Down:  return dy;
-                case Direction::Left:  return -dx;
-                case Direction::Right: return dx;
-                default: return -std::numeric_limits<float>::max();
+    // World doesn't expose an O(1) grid lookup, so these scan getEntities()
+    // and match by grid cell instead - the arena is tiny, so this is cheap.
+    std::shared_ptr<Wall> findWallAt(const World& world, int col, int row) {
+        if (!inGridBounds(col, row)) return nullptr;
+        for (const auto& entity : world.getEntities()) {
+            if (!entity->isAlive()) continue;
+            auto wall = std::dynamic_pointer_cast<Wall>(entity);
+            if (wall && worldToGridCoords(wall->getPosition()) == std::make_pair(col, row)) {
+                return wall;
             }
-        };
-        return progress(a) > progress(b);
-    });
-
-    for (Direction direction : ranked) {
-        const Vector2 candidate = anchor + stepOffset(direction);
-        if (isTileBlocked(world, candidate)) continue;
-        if (isTileDangerous(world, candidate)) continue; // Don't detour through a live blast.
-
-        setMovementInput(direction);
-        return true;
+        }
+        return nullptr;
     }
-    return false;
-}
 
-bool Bot::tryFlee(World& world) {
-    if (!isTileDangerous(world, position)) return false;
+    std::shared_ptr<Bomb> findLiveBombAt(const World& world, int col, int row) {
+        if (!inGridBounds(col, row)) return nullptr;
+        for (const auto& entity : world.getEntities()) {
+            auto bomb = std::dynamic_pointer_cast<Bomb>(entity);
+            if (bomb && !bomb->hasExploded() && worldToGridCoords(bomb->getPosition()) == std::make_pair(col, row)) {
+                return bomb;
+            }
+        }
+        return nullptr;
+    }
 
-    const Vector2 anchor = roundToTileCenter(position);
-    Direction best = Direction::None;
-    float bestScore = -std::numeric_limits<float>::max();
-
-    for (Direction direction : kDirections) {
-        const Vector2 candidate = anchor + stepOffset(direction);
-        if (isTileBlocked(world, candidate)) continue;
-
-        const bool safe = !isTileDangerous(world, candidate);
-
-        float nearestBombDistSq = std::numeric_limits<float>::max();
+    // True if `position` currently sits in the blast line (same row or
+    // column, within the bomb's radius) of any live Bomb.
+    bool isPositionDangerous(const World& world, const Vector2& position) {
         for (const auto& entity : world.getEntities()) {
             auto bomb = std::dynamic_pointer_cast<Bomb>(entity);
             if (!bomb || bomb->hasExploded()) continue;
-            nearestBombDistSq = std::min(nearestBombDistSq, squaredDistance(candidate, bomb->getPosition()));
-        }
 
-        // Prefer candidates that still have somewhere further to go from
-        // them. Without this, a Bot that flees into a pocket bounded by
-        // walls on most sides - including its own just-placed bomb, which
-        // seals the way it came from the moment it steps off it - has no
-        // way to tell that tile apart from open ground: it walks in, finds
-        // every exit blocked, and just sits there until the bomb that's
-        // still "in range" of it goes off.
-        int openExits = 0;
-        for (Direction next : kDirections) {
-            if (!isTileBlocked(world, candidate + stepOffset(next))) ++openExits;
-        }
+            const Vector2 bombPos = bomb->getPosition();
+            const bool sameRow = std::abs(position.y - bombPos.y) < kEpsilonY;
+            const bool sameCol = std::abs(position.x - bombPos.x) < kEpsilonX;
+            if (!sameRow && !sameCol) continue;
 
-        const float score = (safe ? 10000.f : 0.f) + openExits * 1000.f + nearestBombDistSq;
-        if (score > bestScore) {
-            bestScore = score;
-            best = direction;
+            const auto radius = static_cast<float>(bomb->getRadius());
+            if (sameRow) {
+                if (std::abs(position.x - bombPos.x) <= kTileWidth * radius + kEpsilonX) return true;
+            } else {
+                if (std::abs(position.y - bombPos.y) <= kTileHeight * radius + kEpsilonY) return true;
+            }
+        }
+        return false;
+    }
+} // namespace
+
+void Bot::decideNextMove(World& world) {
+    // Priority order: survival first, then opportunistic power-up
+    // collection, then clearing walls to increase the playfield, then
+    // hunting other Characters once there's nothing better to do.
+    if (tryFlee(world)) return;
+    if (tryCollectPowerUp(world)) return;
+    if (tryBreakWalls(world)) return;
+    if (tryAttack(world)) return;
+
+    wander(world);
+}
+
+bool Bot::isWalkable(const World& world, int col, int row) const {
+    if (!inGridBounds(col, row)) return false;
+    return findWallAt(world, col, row) == nullptr && findLiveBombAt(world, col, row) == nullptr;
+}
+
+// Movement here is continuous, not grid-snapped (see Character::update()):
+// a Bot that spends a few ticks moving along one axis and then turns onto
+// the other keeps whatever fractional offset it had on the axis it just
+// left - Character::update() only ever touches one axis per tick, so nothing
+// makes that leftover offset re-center on its own. isWalkable()/findWallAt()
+// only ask "is a Wall/Bomb's own (always tile-centered) position rounded to
+// this same grid cell?" - that's the right question for a HYPOTHETICAL,
+// perfectly-centered Bot, but it says nothing about whether THIS Bot's real,
+// slightly-off-center hitbox would clip a diagonally-adjacent obstacle while
+// crossing into that cell. That gap is exactly what leaves a fleeing Bot
+// standing still (silently reverted by World::handleCollisions every tick,
+// even while it keeps re-issuing the same movement input) right next to its
+// own still-ticking Bomb. Predicting the real collision - not just the
+// idealized one - requires testing the Bot's ACTUAL current position (not a
+// rounded/anchored stand-in) against every Wall/Bomb with the same
+// axis-aligned overlap test World::handleCollisions() itself uses.
+bool Bot::isImmediateStepSafe(const World& world, Direction direction) const {
+    // The axis this Bot is actually moving along will, once this step
+    // completes, sit exactly at the target tile's canonical (tile-center)
+    // value; the OTHER axis never changes during a single-direction move
+    // (Character::update() only ever touches one axis per tick), so it
+    // stays at whatever value this Bot's real, continuous position
+    // currently has - drifted or not. Combining "canonical on the moving
+    // axis, real/raw on the static axis" gives the actual worst-case
+    // overlap point of this transit - the same point
+    // World::handleCollisions() would eventually test against. Using the
+    // raw position on BOTH axes (i.e. just offsetting the current,
+    // possibly-drifted position by a full tile step) instead compounds
+    // whatever drift already exists into the moving axis too, which can
+    // just as easily manufacture a false "blocked" reading against some
+    // unrelated wall as it can miss a real one.
+    const auto [col, row] = worldToGridCoords(getPosition());
+    const Vector2 step = directionToVector(direction);
+    const Vector2 canonicalTarget = gridToWorld(col + static_cast<int>(step.x), row + static_cast<int>(step.y));
+    const Vector2 candidate = (step.x != 0.f)
+        ? Vector2{canonicalTarget.x, getPosition().y}
+        : Vector2{getPosition().x, canonicalTarget.y};
+
+    for (const auto& entity : world.getEntities()) {
+        if (!entity->isAlive()) continue;
+        if (auto wall = std::dynamic_pointer_cast<Wall>(entity)) {
+            if (wouldOverlap(candidate, getSize(), wall->getPosition(), wall->getSize())) return false;
+        } else if (auto bomb = std::dynamic_pointer_cast<Bomb>(entity)) {
+            if (!bomb->hasExploded() && wouldOverlap(candidate, getSize(), bomb->getPosition(), bomb->getSize())) return false;
         }
     }
-
-    setMovementInput(best);
     return true;
 }
 
+bool Bot::isSafeToStepInto(const World& world, int col, int row) const {
+    return isWalkable(world, col, row) && !isPositionDangerous(world, gridToWorld(col, row));
+}
+
+// A Bot can end up genuinely boxed in - not by real Walls/Bombs on every
+// side, but because isImmediateStepSafe() (correctly) refuses a direction
+// whose transit its own residual drift would clip. That drift only ever
+// comes from a direction change made before this Bot finished crossing the
+// tile it was previously in (see isImmediateStepSafe()'s comment) - which
+// means nudging it back towards its CURRENT tile's own center is always a
+// safe, useful thing to try: it either measurably reduces the drift that's
+// causing the lockout, or - if something is already flush against it in
+// that direction - World::handleCollisions() simply reverts the tiny nudge,
+// leaving the Bot no worse off than standing still. Because the move never
+// leaves the current tile, it needs no separate walkability check.
+Direction Bot::recenteringDirection() const {
+    const Vector2 pos = getPosition();
+    const auto [col, row] = worldToGridCoords(pos);
+    const Vector2 anchor = gridToWorld(col, row);
+
+    constexpr float kRecenterTolerance = 0.01f; // World units - well under any collision margin.
+    const float dx = anchor.x - pos.x;
+    const float dy = anchor.y - pos.y;
+
+    // Correct whichever axis is further off-center first.
+    if (std::abs(dx) >= std::abs(dy)) {
+        if (std::abs(dx) > kRecenterTolerance) return dx > 0.f ? Direction::Right : Direction::Left;
+    } else {
+        if (std::abs(dy) > kRecenterTolerance) return dy > 0.f ? Direction::Down : Direction::Up;
+    }
+    return Direction::None; // Already centered - nothing to correct.
+}
+
+bool Bot::tryFlee(World& world) {
+    if (!isPositionDangerous(world, getPosition())) {
+        fleeDirection = Direction::None; // Not fleeing (anymore) - a future flee should plan fresh.
+        return false;
+    }
+
+    const auto [col, row] = worldToGridCoords(getPosition());
+
+    // If already committed to an escape direction from an earlier tick, and
+    // it's still walkable AND the Bot's real (possibly drifted) hitbox can
+    // actually step that way right now, keep going that way rather than
+    // recomputing a fresh BFS plan every single frame. Re-checking
+    // isImmediateStepSafe() every tick (not just isWalkable()) matters
+    // because a direction that looked clear when first chosen can still be
+    // physically blocked in practice by drift-induced clipping (see
+    // isImmediateStepSafe()'s comment) - without this, a Bot can keep
+    // "committing" to a direction it never actually moves in, and sit still
+    // until its own Bomb goes off.
+    if (fleeDirection != Direction::None) {
+        const Vector2 offset = directionToVector(fleeDirection);
+        const int nextCol = col + static_cast<int>(offset.x);
+        const int nextRow = row + static_cast<int>(offset.y);
+        if (isWalkable(world, nextCol, nextRow) && isImmediateStepSafe(world, fleeDirection)) {
+            setMovementInput(fleeDirection);
+            return true;
+        }
+    }
+
+    fleeDirection = findEscapeDirection(world, col, row);
+    if (fleeDirection == Direction::None) {
+        // No reachable tile currently registers as safe - possibly because
+        // this Bot's own drift makes an otherwise-clear corridor exit look
+        // blocked (see isImmediateStepSafe()). Nudging back towards this
+        // tile's center can't make things worse, and often clears the drift
+        // that was the actual problem within a tick or two.
+        fleeDirection = recenteringDirection();
+    }
+    setMovementInput(fleeDirection);
+    return true; // Whether or not a safe cell was actually found, fleeing has "claimed" this tick.
+}
+
+Direction Bot::findEscapeDirection(const World& world, int startCol, int startRow) const {
+    struct Node {
+        int col;
+        int row;
+        int firstStepIndex; // Which of the 4 initial directions this node's path branched from.
+    };
+
+    std::queue<Node> frontier;
+    std::set<std::pair<int, int>> visited{{startCol, startRow}};
+
+    // Seeding the frontier is the ONE place a real (not just idealized)
+    // step needs verifying: everything the BFS explores beyond this first
+    // hop is a hypothetical, perfectly-centered future cell, but this very
+    // first step is the one the Bot's real, possibly drifted hitbox has to
+    // take right now - see isImmediateStepSafe().
+    for (int i = 0; i < 4; ++i) {
+        const int c = startCol + kGridOffsets[i].first;
+        const int r = startRow + kGridOffsets[i].second;
+        if (isWalkable(world, c, r) && isImmediateStepSafe(world, kGridDirections[i]) && visited.insert({c, r}).second) {
+            frontier.push({c, r, i});
+        }
+    }
+
+    // The grid only has kArenaColumns*kArenaRows cells in total, so a full
+    // BFS is trivially cheap - no need for an artificial search-depth
+    // cutoff.
+    while (!frontier.empty()) {
+        const Node node = frontier.front();
+        frontier.pop();
+
+        if (!isPositionDangerous(world, gridToWorld(node.col, node.row))) {
+            return kGridDirections[node.firstStepIndex]; // Found the nearest safe tile - go that way.
+        }
+
+        for (int i = 0; i < 4; ++i) {
+            const int c = node.col + kGridOffsets[i].first;
+            const int r = node.row + kGridOffsets[i].second;
+            if (isWalkable(world, c, r) && visited.insert({c, r}).second) {
+                frontier.push({c, r, node.firstStepIndex}); // Keep the ORIGINAL first step, not this one.
+            }
+        }
+    }
+
+    return Direction::None; // Genuinely boxed in on every side - nothing left to do but hope.
+}
+
+void Bot::wander(World& world) {
+    // Nothing urgent to do - wander into a random open neighbour so the Bot
+    // keeps exploring the arena instead of standing completely still.
+    // Commits to wanderDirection across ticks instead of re-rolling a fresh
+    // random direction every single frame (which would otherwise make an
+    // idle Bot visibly jitter in place), but - like tryFlee() - re-checks
+    // isImmediateStepSafe() every tick rather than trusting a stale choice,
+    // since drift can turn a previously-clear direction into a real one.
+    const auto [col, row] = worldToGridCoords(getPosition());
+
+    if (wanderDirection != Direction::None) {
+        const Vector2 offset = directionToVector(wanderDirection);
+        const int nextCol = col + static_cast<int>(offset.x);
+        const int nextRow = row + static_cast<int>(offset.y);
+        if (isSafeToStepInto(world, nextCol, nextRow) && isImmediateStepSafe(world, wanderDirection)) {
+            setMovementInput(wanderDirection);
+            return;
+        }
+    }
+
+    for (int attempt = 0; attempt < 4; ++attempt) {
+        const Direction candidate = kGridDirections[Random::getInstance().getInt(0, 3)];
+        const Vector2 offset = directionToVector(candidate);
+        if (isSafeToStepInto(world, col + static_cast<int>(offset.x), row + static_cast<int>(offset.y)) &&
+            isImmediateStepSafe(world, candidate)) {
+            wanderDirection = candidate;
+            setMovementInput(candidate);
+            return;
+        }
+    }
+    wanderDirection = Direction::None;
+    setMovementInput(recenteringDirection()); // Nothing else viable - see recenteringDirection()'s comment.
+}
+
 bool Bot::tryCollectPowerUp(World& world) {
-    std::shared_ptr<PowerUp> nearest;
-    float nearestDistSq = kPowerUpDetectionRange * kPowerUpDetectionRange;
+    constexpr int kDetectionRange = 5; // Tiles - a Bot only "notices" powerups this close.
+    const auto [col, row] = worldToGridCoords(getPosition());
+
+    int bestDistance = kDetectionRange + 1;
+    int targetCol = 0;
+    int targetRow = 0;
+    Vector2 targetPosition{};
+    bool found = false;
 
     for (const auto& entity : world.getEntities()) {
         auto powerUp = std::dynamic_pointer_cast<PowerUp>(entity);
         if (!powerUp || !powerUp->isAlive()) continue;
-        const float distSq = squaredDistance(position, powerUp->getPosition());
-        if (distSq < nearestDistSq) {
-            nearestDistSq = distSq;
-            nearest = powerUp;
+
+        const auto [pCol, pRow] = worldToGridCoords(powerUp->getPosition());
+        const int distance = std::abs(pCol - col) + std::abs(pRow - row);
+        if (distance < bestDistance) {
+            bestDistance = distance;
+            targetCol = pCol;
+            targetRow = pRow;
+            targetPosition = powerUp->getPosition();
+            found = true;
         }
     }
-    if (!nearest) return false;
 
-    return moveTowards(world, nearest->getPosition());
+    if (!found) return false;
+
+    if (targetCol == col && targetRow == row) {
+        // Already in the powerup's grid cell, but World::handleCollisions()
+        // only actually grants the pickup once this Bot's hitbox truly
+        // overlaps the powerup's exact (continuous) position - "same grid
+        // cell" isn't precise enough. Do a precise final approach instead
+        // for this last short stretch (the whole cell is guaranteed open -
+        // a powerup can't spawn inside a wall - so there's nothing to route
+        // around here).
+        chaseExactPosition(targetPosition);
+        return true;
+    }
+    return stepToward(world, targetCol, targetRow);
 }
 
 bool Bot::tryBreakWalls(World& world) {
-    std::shared_ptr<Wall> nearest;
-    float nearestDistSq = std::numeric_limits<float>::max();
+    if (!canPlaceBomb()) {
+        // Already have a bomb out - no point pathing towards (and
+        // potentially walking straight back next to) a wall we can't blow
+        // up yet. Let a lower-priority behaviour use this tick instead.
+        return false;
+    }
+
+    const auto [col, row] = worldToGridCoords(getPosition());
+
+    // Highest priority within this behaviour: a destructible wall directly
+    // next to us - blow it up right away rather than walking towards it.
+    for (const auto& [dCol, dRow] : kGridOffsets) {
+        if (auto wall = findWallAt(world, col + dCol, row + dRow)) {
+            if (wall->isDestructible()) {
+                world.placeBomb(*this);
+                return true;
+            }
+        }
+    }
+
+    // Otherwise, head towards the closest destructible wall within a
+    // modest search radius, so the Bot actively increases its playfield
+    // over time instead of only reacting to what's adjacent.
+    constexpr int kSearchRadius = 6;
+    int bestDistance = kSearchRadius + 1;
+    int targetCol = 0;
+    int targetRow = 0;
+    bool found = false;
 
     for (const auto& entity : world.getEntities()) {
         auto wall = std::dynamic_pointer_cast<Wall>(entity);
         if (!wall || !wall->isAlive() || !wall->isDestructible()) continue;
-        const float distSq = squaredDistance(position, wall->getPosition());
-        if (distSq < nearestDistSq) {
-            nearestDistSq = distSq;
-            nearest = wall;
+
+        const auto [wCol, wRow] = worldToGridCoords(wall->getPosition());
+        const int distance = std::abs(wCol - col) + std::abs(wRow - row);
+        if (distance < bestDistance) {
+            bestDistance = distance;
+            targetCol = wCol;
+            targetRow = wRow;
+            found = true;
         }
     }
-    if (!nearest) return false; // None left - tryAttack() takes over.
 
-    if (canPlaceBomb() && isInLineWithinRange(position, nearest->getPosition(), getBombRadius())) {
-        world.placeBomb(*this);
-        return true; // tryFlee() steers the Bot away from its own bomb next tick.
-    }
-
-    return moveTowards(world, nearest->getPosition());
+    if (!found) return false; // No destructible walls left nearby.
+    return stepToward(world, targetCol, targetRow);
 }
 
 bool Bot::tryAttack(World& world) {
-    std::shared_ptr<Character> target;
-    float nearestDistSq = std::numeric_limits<float>::max();
+    constexpr int kEngageRange = 4; // Tiles - how far away an enemy has to be noticed and chased.
+    const auto [col, row] = worldToGridCoords(getPosition());
+
+    int bestDistance = kEngageRange + 1;
+    int targetCol = 0;
+    int targetRow = 0;
+    bool found = false;
 
     for (const auto& entity : world.getEntities()) {
         auto character = std::dynamic_pointer_cast<Character>(entity);
         if (!character || character.get() == this || !character->isAlive()) continue;
-        const float distSq = squaredDistance(position, character->getPosition());
-        if (distSq < nearestDistSq) {
-            nearestDistSq = distSq;
-            target = character;
+
+        const auto [oCol, oRow] = worldToGridCoords(character->getPosition());
+        const int distance = std::abs(oCol - col) + std::abs(oRow - row);
+        if (distance < bestDistance) {
+            bestDistance = distance;
+            targetCol = oCol;
+            targetRow = oRow;
+            found = true;
         }
     }
-    if (!target) return false;
 
-    if (canPlaceBomb() && isInLineWithinRange(position, target->getPosition(), getBombRadius())) {
+    if (!found) return false;
+    if (bestDistance <= 1 && canPlaceBomb()) {
         world.placeBomb(*this);
         return true;
     }
-
-    return moveTowards(world, target->getPosition());
+    return stepToward(world, targetCol, targetRow);
 }
 
-void Bot::decideNextMove(World& world) {
-    if (!isAlive()) {
+bool Bot::stepToward(World& world, int targetCol, int targetRow) {
+    const auto [col, row] = worldToGridCoords(getPosition());
+    const int dCol = targetCol - col;
+    const int dRow = targetRow - row;
+
+    if (dCol == 0 && dRow == 0) {
+        setMovementInput(Direction::None);
+        return false; // Already there.
+    }
+
+    const Direction horizontal = dCol > 0 ? Direction::Right : Direction::Left;
+    const Direction vertical = dRow > 0 ? Direction::Down : Direction::Up;
+    const bool preferHorizontal = std::abs(dCol) >= std::abs(dRow);
+
+    // Try the axis with the bigger gap first; if it's blocked (or would
+    // walk through an active blast, or would clip an obstacle given this
+    // Bot's real current drift - see isImmediateStepSafe()), fall back to
+    // the other axis rather than getting stuck waiting on one path.
+    if (preferHorizontal && dCol != 0 && isSafeToStepInto(world, col + (dCol > 0 ? 1 : -1), row) &&
+        isImmediateStepSafe(world, horizontal)) {
+        setMovementInput(horizontal);
+        return true;
+    }
+    if (dRow != 0 && isSafeToStepInto(world, col, row + (dRow > 0 ? 1 : -1)) &&
+        isImmediateStepSafe(world, vertical)) {
+        setMovementInput(vertical);
+        return true;
+    }
+    if (dCol != 0 && isSafeToStepInto(world, col + (dCol > 0 ? 1 : -1), row) &&
+        isImmediateStepSafe(world, horizontal)) {
+        setMovementInput(horizontal);
+        return true;
+    }
+
+    // Every useful direction is blocked or dangerous - try to correct any
+    // drift instead of freezing (see recenteringDirection()).
+    const Direction recenter = recenteringDirection();
+    setMovementInput(recenter);
+    return recenter != Direction::None;
+}
+
+void Bot::chaseExactPosition(Vector2 targetPosition) {
+    const Vector2 myPosition = getPosition();
+    const float dx = targetPosition.x - myPosition.x;
+    const float dy = targetPosition.y - myPosition.y;
+
+    // Small tolerance so the Bot doesn't jitter back and forth trying to
+    // land on the exact floating-point target position - collision
+    // (World::handleCollisions()) takes over as soon as the hitboxes
+    // overlap, well before this tolerance would ever matter.
+    constexpr float kArrivalEpsilon = 0.01f;
+    if (std::abs(dx) < kArrivalEpsilon && std::abs(dy) < kArrivalEpsilon) {
         setMovementInput(Direction::None);
         return;
     }
 
-    if (tryFlee(world)) return;
-    if (tryCollectPowerUp(world)) return;
-
-    // "...or an enemy is close" - go for the kill instead of detouring to
-    // a wall when someone's right on top of us.
-    if (isEnemyClose(world) && tryAttack(world)) return;
-    if (tryBreakWalls(world)) return;
-    if (tryAttack(world)) return;
-
-    setMovementInput(Direction::None);
+    if (std::abs(dx) >= std::abs(dy)) {
+        setMovementInput(dx > 0.f ? Direction::Right : Direction::Left);
+    } else {
+        setMovementInput(dy > 0.f ? Direction::Down : Direction::Up);
+    }
 }
 
 } // namespace bomberman::logic
