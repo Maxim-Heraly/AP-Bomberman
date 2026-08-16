@@ -127,8 +127,15 @@ void Bot::decideNextMove(World& world) {
         detouring = false; // Arrived - forget the old target, re-evaluate fresh above.
         return false;
     }
+
+    // Fixed for the whole crossing - do NOT re-derive from getPosition()
+    // here, see isImmediateStepSafeFrom()'s comment.
+    const Vector2 step = directionToVector(detourDirection);
+    const int sourceCol = detourTargetCol - static_cast<int>(step.x);
+    const int sourceRow = detourTargetRow - static_cast<int>(step.y);
+
     if (isSafeToStepInto(world, detourTargetCol, detourTargetRow) &&
-        isImmediateStepSafe(world, detourDirection)) {
+        isImmediateStepSafeFrom(world, detourDirection, sourceCol, sourceRow)) {
         setMovementInput(detourDirection);
         return true;
         }
@@ -157,27 +164,17 @@ bool Bot::isWalkable(const World& world, int col, int row) const {
 // idealized one - requires testing the Bot's ACTUAL current position (not a
 // rounded/anchored stand-in) against every Wall/Bomb with the same
 // axis-aligned overlap test World::handleCollisions() itself uses.
-bool Bot::isImmediateStepSafe(const World& world, Direction direction) const {
-    // The axis this Bot is actually moving along will, once this step
-    // completes, sit exactly at the target tile's canonical (tile-center)
-    // value; the OTHER axis never changes during a single-direction move
-    // (Character::update() only ever touches one axis per tick), so it
-    // stays at whatever value this Bot's real, continuous position
-    // currently has - drifted or not. Combining "canonical on the moving
-    // axis, real/raw on the static axis" gives the actual worst-case
-    // overlap point of this transit - the same point
-    // World::handleCollisions() would eventually test against. Using the
-    // raw position on BOTH axes (i.e. just offsetting the current,
-    // possibly-drifted position by a full tile step) instead compounds
-    // whatever drift already exists into the moving axis too, which can
-    // just as easily manufacture a false "blocked" reading against some
-    // unrelated wall as it can miss a real one.
+    bool Bot::isImmediateStepSafe(const World& world, Direction direction) const {
     const auto [col, row] = worldToGridCoords(getPosition());
+    return isImmediateStepSafeFrom(world, direction, col, row);
+}
+
+    bool Bot::isImmediateStepSafeFrom(const World& world, Direction direction, int col, int row) const {
     const Vector2 step = directionToVector(direction);
     const Vector2 canonicalTarget = gridToWorld(col + static_cast<int>(step.x), row + static_cast<int>(step.y));
     const Vector2 candidate = (step.x != 0.f)
         ? Vector2{canonicalTarget.x, getPosition().y}
-        : Vector2{getPosition().x, canonicalTarget.y};
+    : Vector2{getPosition().x, canonicalTarget.y};
 
     for (const auto& entity : world.getEntities()) {
         if (!entity->isAlive()) continue;

@@ -118,6 +118,16 @@ namespace bomberman::logic {
         /// through to a fresh, target-agnostic re-evaluation.
         bool continueDetour(World& world);
 
+        /// Like isImmediateStepSafe(), but tests the step from an explicit
+        /// (col, row) departure tile instead of deriving it by rounding
+        /// getPosition(). Needed by continueDetour(), which must keep validating
+        /// the *same* crossing over several ticks - re-deriving the departure tile
+        /// from getPosition() each tick starts reporting the arrival tile as soon
+        /// as this Bot passes the tile's midpoint (well before isCenteredOnTile()
+        /// considers it arrived), which tests one tile too far and freezes the Bot
+        /// straddling the crossover.
+        [[nodiscard]] bool isImmediateStepSafeFrom(const World& world, Direction direction, int col, int row) const;
+
         /// Which (col, row) stepToward() last failed to make progress
         /// towards, and for how many consecutive ticks it's been stuck on
         /// that same target - see stepToward()'s .cpp comment for why this

@@ -53,9 +53,9 @@ CharacterAnimationSet makeCharacterAnimationSet(CharacterSpriteVariant variant) 
                     Frames4{rect(3, 72), rect(20, 72), rect(37, 72), rect(20, 72)}
                 },
                 Frames12{
-                    winRect(3, 197), winRect(20, 197), winRect(37, 197), winRect(54, 197),
-                    winRect(71, 197), winRect(88, 197), winRect(105, 197), winRect(88, 197),
-                    winRect(71, 197), winRect(54, 197), winRect(37, 197), winRect(20, 197)
+                    winRect(3, 198), winRect(20, 198), winRect(37, 198), winRect(54, 198),
+                    winRect(71, 198), winRect(88, 198), winRect(105, 198), winRect(88, 198),
+                    winRect(71, 198), winRect(54, 198), winRect(37, 198), winRect(20, 198)
                 },
                 Frames12{
                     rect(3, 160), rect(20, 160), rect(37, 160), rect(54, 160),
