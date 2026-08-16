@@ -103,6 +103,21 @@ namespace bomberman::logic {
         /// The direction chosen by the most recent wander() call.
         Direction wanderDirection{Direction::None};
 
+        bool detouring{false};
+        Direction detourDirection{Direction::None};
+        int detourTargetCol{0};
+        int detourTargetRow{0};
+
+        /// Finishes an in-progress detour started by stepToward(): keeps
+        /// stepping in detourDirection until this Bot is actually
+        /// centered on (detourTargetCol, detourTargetRow) - not just
+        /// until worldToGridCoords() rounds over to it - re-verifying
+        /// safety every tick. Returns true while still mid-crossing
+        /// (claims this tick's move); returns false once the detour is
+        /// complete or had to be abandoned, so decideNextMove() falls
+        /// through to a fresh, target-agnostic re-evaluation.
+        bool continueDetour(World& world);
+
         /// Which (col, row) stepToward() last failed to make progress
         /// towards, and for how many consecutive ticks it's been stuck on
         /// that same target - see stepToward()'s .cpp comment for why this

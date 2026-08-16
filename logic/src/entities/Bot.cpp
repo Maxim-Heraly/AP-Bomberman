@@ -35,6 +35,13 @@ namespace {
                 -1.f + kTileHeight * 0.5f + static_cast<float>(row) * kTileHeight};
     }
 
+    bool isCenteredOnTile(const Vector2& position, int col, int row) {
+        const Vector2 anchor = gridToWorld(col, row);
+        constexpr float kCenterArrivalTolerance = 0.01f; // Mirrors recenteringDirection()'s tolerance.
+        return std::abs(position.x - anchor.x) < kCenterArrivalTolerance &&
+               std::abs(position.y - anchor.y) < kCenterArrivalTolerance;
+    }
+
     bool inGridBounds(int col, int row) {
         return col >= 0 && col < kArenaColumns && row >= 0 && row < kArenaRows;
     }
@@ -101,12 +108,32 @@ void Bot::decideNextMove(World& world) {
     // Priority order: survival first, then opportunistic power-up
     // collection, then clearing walls to increase the playfield, then
     // hunting other Characters once there's nothing better to do.
-    if (tryFlee(world)) return;
+    if (tryFlee(world)) {
+        detouring = false;
+        return;
+    }
+    if (detouring) {
+        if (continueDetour(world)) return;
+    }
     if (tryCollectPowerUp(world)) return;
     if (tryBreakWalls(world)) return;
     if (tryAttack(world)) return;
 
     wander(world);
+}
+
+    bool Bot::continueDetour(World& world) {
+    if (isCenteredOnTile(getPosition(), detourTargetCol, detourTargetRow)) {
+        detouring = false; // Arrived - forget the old target, re-evaluate fresh above.
+        return false;
+    }
+    if (isSafeToStepInto(world, detourTargetCol, detourTargetRow) &&
+        isImmediateStepSafe(world, detourDirection)) {
+        setMovementInput(detourDirection);
+        return true;
+        }
+    detouring = false; // Became unsafe mid-crossing - abandon, let the normal chain react.
+    return false;
 }
 
 bool Bot::isWalkable(const World& world, int col, int row) const {
@@ -486,6 +513,50 @@ bool Bot::stepToward(World& world, int targetCol, int targetRow) {
         setMovementInput(horizontal);
         stuckTicks = 0;
         return true;
+    }
+
+        if (dCol != 0 && isSafeToStepInto(world, col + (dCol > 0 ? 1 : -1), row) &&
+        isImmediateStepSafe(world, horizontal)) {
+        setMovementInput(horizontal);
+        stuckTicks = 0;
+        return true;
+    }
+
+    // Straight-line case: the target shares this Bot's row or column
+    // exactly, so neither axis fallback above had another axis to try.
+    // If it's specifically an indestructible pillar blocking the one
+    // direction available, don't try to cleverly keep tracking THIS
+    // target while sidestepping around it - hand off to a short, blind,
+    // target-agnostic detour instead (see decideNextMove()/
+    // continueDetour()). Pillars only ever occupy cells where BOTH grid
+    // coordinates are even, so the perpendicular neighbour tile is always
+    // guaranteed pillar-free.
+    if (dCol == 0 || dRow == 0) {
+        const Direction blockedDirection = (dRow != 0) ? vertical : horizontal;
+        const Vector2 blockedOffset = directionToVector(blockedDirection);
+        const auto obstacle = findWallAt(world, col + static_cast<int>(blockedOffset.x),
+                                                  row + static_cast<int>(blockedOffset.y));
+
+        if (obstacle && !obstacle->isDestructible()) {
+            const std::array<Direction, 2> perpendicular = (dCol == 0)
+                ? std::array<Direction, 2>{Direction::Left, Direction::Right}
+            : std::array<Direction, 2>{Direction::Up, Direction::Down};
+
+            for (Direction side : perpendicular) {
+                const Vector2 offset = directionToVector(side);
+                const int sCol = col + static_cast<int>(offset.x);
+                const int sRow = row + static_cast<int>(offset.y);
+                if (isSafeToStepInto(world, sCol, sRow) && isImmediateStepSafe(world, side)) {
+                    detouring = true;
+                    detourDirection = side;
+                    detourTargetCol = sCol;
+                    detourTargetRow = sRow;
+                    setMovementInput(side);
+                    stuckTicks = 0;
+                    return true;
+                }
+            }
+        }
     }
 
     // Genuinely can't progress towards (targetCol, targetRow) right now.
