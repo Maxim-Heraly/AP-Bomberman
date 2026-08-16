@@ -1,4 +1,3 @@
-// logic/src/entities/Bot.cpp
 #include "logic/entities/Bot.hpp"
 #include "logic/World.hpp"
 #include "logic/entities/Bomb.hpp"
@@ -108,6 +107,8 @@ void Bot::decideNextMove(World& world) {
     // Priority order: survival first, then opportunistic power-up
     // collection, then clearing walls to increase the playfield, then
     // hunting other Characters once there's nothing better to do.
+    updateStuckWatchdog();
+
     if (tryFlee(world)) {
         detouring = false;
         return;
@@ -512,13 +513,6 @@ bool Bot::stepToward(World& world, int targetCol, int targetRow) {
         return true;
     }
 
-        if (dCol != 0 && isSafeToStepInto(world, col + (dCol > 0 ? 1 : -1), row) &&
-        isImmediateStepSafe(world, horizontal)) {
-        setMovementInput(horizontal);
-        stuckTicks = 0;
-        return true;
-    }
-
     // Straight-line case: the target shares this Bot's row or column
     // exactly, so neither axis fallback above had another axis to try.
     // If it's specifically an indestructible pillar blocking the one
@@ -606,6 +600,35 @@ void Bot::chaseExactPosition(Vector2 targetPosition) {
     } else {
         setMovementInput(dy > 0.f ? Direction::Down : Direction::Up);
     }
+}
+
+void Bot::updateStuckWatchdog() {
+    const Vector2 pos = getPosition();
+    constexpr float kMovedEpsilon = 0.001f; // Comfortably under one tick's worth of movement at any speed.
+    const bool moved = std::abs(pos.x - lastWatchdogPosition.x) > kMovedEpsilon ||
+                        std::abs(pos.y - lastWatchdogPosition.y) > kMovedEpsilon;
+
+    if (moved || movementInput == Direction::None) {
+        lastWatchdogPosition = pos;
+        watchdogStuckTicks = 0;
+        return;
+    }
+
+    ++watchdogStuckTicks;
+    constexpr int kWatchdogTimeout = 60; // ~0.5s at 60 ticks/s.
+    if (watchdogStuckTicks <= kWatchdogTimeout) return;
+
+    // Genuinely not moving despite an active movement input for half a
+    // second straight. Whatever committed this Bot to that direction is
+    // wrong about safety for wherever it physically is right now - clear
+    // every commitment so the chain below reconsiders everything fresh.
+    fleeDirection = Direction::None;
+    wanderDirection = Direction::None;
+    detouring = false;
+    stuckTicks = 0;
+    watchdogStuckTicks = 0;
+    lastWatchdogPosition = pos;
+    setMovementInput(Direction::None);
 }
 
 } // namespace bomberman::logic

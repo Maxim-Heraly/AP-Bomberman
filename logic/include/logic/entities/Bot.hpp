@@ -1,4 +1,3 @@
-// logic/include/logic/entities/Bot.hpp
 #pragma once
 
 #include "logic/entities/Character.hpp"
@@ -136,6 +135,11 @@ namespace bomberman::logic {
         /// e.g. wander(), try something else).
         std::pair<int, int> stuckTarget{0, 0};
         int stuckTicks{0};
+
+        void updateStuckWatchdog();
+
+        Vector2 lastWatchdogPosition{};
+        int watchdogStuckTicks{0};
     };
 
 } // namespace bomberman::logic
