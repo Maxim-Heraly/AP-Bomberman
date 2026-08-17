@@ -37,6 +37,7 @@ public:
     void addPowerUpCollected() { currentScore += 25; }
     void addPlayerWon() { currentScore += 500; }
     void addPlayerLost() { currentScore -= 100; }
+    void addTick() { currentScore += 1; }
 
     /// TODO: read/write e.g. a simple "name,score" text format to disk. Wrap
     /// file I/O in try/catch (section 3.2, "Include exception handling").

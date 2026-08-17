@@ -70,14 +70,13 @@ void World::initialize() {
 }
 
 void World::update(float deltaTime) {
-    // TODO, suggested order:
-    // 1. for each Bot in entities_: decideNextMove(*this)
-    // 2. for each entity: entity->update(deltaTime)
-    // 3. handleCollisions()
-    // 4. for each Bomb with hasExploded(): explode(*bomb)
-    // 5. erase-remove every entity with !isAlive() from entities_
-    // 6. update gameOver_ (Player died, or Player is the last Character standing)
     if (!gameOver) {
+        tickTimer += deltaTime;
+
+        if (tickTimer >= 1.f) {
+            score->addTick();
+            tickTimer -= 1.f;
+        }
         std::vector<std::shared_ptr<Bot>> bots;
         bots.reserve(entities.size());
         for (const auto& entity : entities) {

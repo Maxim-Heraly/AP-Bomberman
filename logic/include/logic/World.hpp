@@ -46,6 +46,7 @@ private:
     std::shared_ptr<Character> player;
     std::shared_ptr<Score> score = Score::getInstance();
     bool gameOver{false};
+    float tickTimer{0.f};
 };
 
 } // namespace bomberman::logic

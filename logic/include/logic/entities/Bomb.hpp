@@ -33,7 +33,7 @@ public:
 private:
     std::weak_ptr<Character> owner;
     int radius;
-    float fuseRemaining{3.f};
+    float fuseRemaining{2.f};
     bool exploded{false};
     bool ownerCanPassThrough{true};
     BlastProfile blastProfile;
