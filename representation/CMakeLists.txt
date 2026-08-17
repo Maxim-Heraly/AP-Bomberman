@@ -3,6 +3,7 @@ find_package(SFML 2.6 COMPONENTS graphics window system audio REQUIRED)
 add_library(bomberman_representation STATIC
     src/Game.cpp
     src/ConcreteFactory.cpp
+    src/AudioManager.cpp
     src/states/StateManager.cpp
     src/states/MenuState.cpp
     src/states/PlayState.cpp

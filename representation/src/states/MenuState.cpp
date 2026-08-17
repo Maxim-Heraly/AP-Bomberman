@@ -1,6 +1,7 @@
 #include "representation/states/MenuState.hpp"
 #include "representation/states/PlayState.hpp"
 #include "representation/states/StateManager.hpp"
+#include "representation/AudioManager.hpp"
 #include <sstream>
 
 namespace bomberman::representation {
@@ -12,6 +13,7 @@ constexpr float ButtonHeight = 60.f;
 
 MenuState::MenuState(StateManager& manager) : State(manager) {
     score->loadHighScores("../../highscores.txt");
+    AudioManager::getInstance().playMenuMusic();
 }
 
 void MenuState::handleEvent(const sf::Event& event) {

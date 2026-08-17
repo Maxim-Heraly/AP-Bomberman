@@ -30,6 +30,7 @@ private:
     Camera camera;
     logic::Direction movementDirection{logic::Direction::None};
     float timer{0.0f};
+    bool resultSoundPlayed{false};
 };
 
 } // namespace bomberman::representation

@@ -107,7 +107,7 @@ void World::update(float deltaTime) {
         }
 
         for (const auto& bomb : explodedBombs) {
-            explode(*bomb);
+            if (!gameOver) explode(*bomb);
         }
 
         entities.erase(

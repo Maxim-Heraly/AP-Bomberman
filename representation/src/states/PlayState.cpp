@@ -3,6 +3,7 @@
 #include "logic/entities/Character.hpp"
 #include "representation/states/StateManager.hpp"
 #include "representation/views/ScoreView.hpp"
+#include "representation/AudioManager.hpp"
 #include "logic/Score.hpp"
 
 namespace bomberman::representation {
@@ -14,6 +15,7 @@ PlayState::PlayState(StateManager& manager)
       world(factory),
       camera(900, 690) {
     world.initialize();
+    AudioManager::getInstance().playGameplayMusic();
 }
 
 namespace {
@@ -59,10 +61,18 @@ void PlayState::update(float deltaTime) {
     }
 
     if (world.isGameOver()) {
+        if (!resultSoundPlayed) {
+            resultSoundPlayed = true;
+            const auto player = world.getPlayer();
+            const bool won = player && player->isAlive();
+            won ? AudioManager::getInstance().playVictorySound() : AudioManager::getInstance().playLossSound();
+        }
         timer += deltaTime;
         if (timer >= 5.0f) {
             score->saveHighScores("../../highscores.txt");
+            AudioManager::getInstance().stopMusic();
             manager.changeState(std::make_unique<MenuState>(manager));
+
         }
     }
 }
