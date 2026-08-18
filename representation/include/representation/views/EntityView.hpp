@@ -19,7 +19,8 @@ public:
     virtual void update(float deltaTime) {(void)deltaTime;}
     virtual void draw(sf::RenderWindow& window, const Camera& camera) = 0;
 
-    bool isMarkedForRemoval() const { return markedForRemoval; }
+    [[nodiscard]] bool isMarkedForRemoval() const { return markedForRemoval; }
+    [[nodiscard]] virtual int getDrawLayer() const {return 0;}
 
 protected:
     bool markedForRemoval{false};

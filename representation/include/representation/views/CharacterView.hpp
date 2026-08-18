@@ -28,6 +28,7 @@ public:
 
     void onNotify(const logic::Subject& source, logic::EventType event) override;
     void draw(sf::RenderWindow& window, const Camera& camera) override;
+    [[nodiscard]] int getDrawLayer() const override { return 1; }
 
     void setWon();
     void setDead();

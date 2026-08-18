@@ -81,8 +81,12 @@ void PlayState::render(sf::RenderWindow& window) {
     const auto windowSize = window.getSize();
     camera.setWindowSize(windowSize.x, windowSize.y);
 
-    for (const auto& view : factory->getViews()) {
-        view->draw(window, camera);
+    const auto& views = factory->getViews();
+    for (const auto& view : views) {
+        if (view->getDrawLayer() == 0) view->draw(window, camera);
+    }
+    for (const auto& view : views) {
+        if (view->getDrawLayer() == 1) view->draw(window, camera);
     }
     ScoreView scoreView(logic::Score::getInstance());
     scoreView.draw(window, 10, 10);

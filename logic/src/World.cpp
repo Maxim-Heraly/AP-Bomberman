@@ -31,7 +31,7 @@ namespace {
     }
 
     bool wasAlreadyOverlappingBomb(const std::shared_ptr<Character>& character, const std::shared_ptr<Bomb>& bomb) {
-        return aabbOverlap(character->getPreviousPosition(), character->getSize(),
+        return aabbOverlap(character->getPreviousPosition(), character->getHitbox(),
                            bomb->getPosition(), bomb->getSize());
     }
 
@@ -356,7 +356,7 @@ void World::explode(Bomb& bomb) {
                                 if (ownerIsPlayer) {
                                     owner->declareBlockDestroyed();
                                 }
-                                if (Random::getInstance().chance(0.33f)) {
+                                if (Random::getInstance().chance(0.2f)) {
                                     auto chance = Random::getInstance().getInt(1,3);
                                     PowerUpType type;
                                     if (chance == 1) { type = PowerUpType::Fire;}

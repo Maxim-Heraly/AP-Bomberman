@@ -3,7 +3,11 @@
 
 namespace bomberman::logic {
 
-Character::Character(Vector2 position, Vector2 size) : EntityModel(position, size) {}
+    namespace {
+        constexpr float kHitboxScale = 0.8f;
+    }
+
+Character::Character(Vector2 position, Vector2 size) : EntityModel(position, size, size*kHitboxScale) {}
 
 void Character::update(float deltaTime) {
     previousPosition = position;

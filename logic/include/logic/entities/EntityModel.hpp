@@ -15,11 +15,13 @@ namespace bomberman::logic {
  */
 class EntityModel : public Subject {
 public:
-    EntityModel(Vector2 position, Vector2 size) : position(position), size(size) {}
+    EntityModel(Vector2 posiotion, Vector2 size, Vector2 hitbox) : position(posiotion), size(size), hitbox(hitbox) {}
+    EntityModel(Vector2 position, Vector2 size) : EntityModel(position, size, size) {}
     ~EntityModel() override = default;
 
     [[nodiscard]] const Vector2& getPosition() const { return position; }
     [[nodiscard]] const Vector2& getSize() const { return size; }
+    [[nodiscard]] const Vector2& getHitbox() const {return hitbox;}
 
     [[nodiscard]] bool isAlive() const { return alive; }
 
@@ -37,6 +39,7 @@ public:
 protected:
     Vector2 position;
     Vector2 size;
+    Vector2 hitbox;
     bool alive{true};
 
     void markDead() { alive = false; }
