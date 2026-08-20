@@ -35,8 +35,8 @@ namespace bomberman::logic {
         void decideNextMove(World& world);
 
     private:
-        bool tryFlee(World& world);
-        bool tryCollectPowerUp(World& world);
+        bool tryFlee(const World& world);
+        bool tryCollectPowerUp(const World& world);
         bool tryBreakWalls(World& world);
         bool tryAttack(World& world);
 
@@ -45,7 +45,7 @@ namespace bomberman::logic {
         /// back to the other axis if that direction turns out to be
         /// blocked or dangerous. See the .cpp for what happens when
         /// neither axis works.
-        bool stepToward(World& world, int targetCol, int targetRow);
+        bool stepToward(const World& world, int targetCol, int targetRow);
 
         /// Fine-grained final approach towards an exact world position -
         /// used once this Bot is already standing in a PowerUp's own grid
@@ -58,7 +58,7 @@ namespace bomberman::logic {
         /// wanderDirection) across ticks instead of re-rolling a fresh
         /// random direction every single frame, which would otherwise make
         /// idle Bots jitter in place rather than actually wandering.
-        void wander(World& world);
+        void wander(const World& world);
 
         /// Breadth-first search over walkable grid tiles, starting from
         /// (startCol, startRow), for the nearest tile where this Bot would
@@ -69,7 +69,7 @@ namespace bomberman::logic {
 
         /// True if (col, row) is inside the arena and has no Wall or live
         /// Bomb standing on it.
-        [[nodiscard]] bool isWalkable(const World& world, int col, int row) const;
+        static [[nodiscard]] bool isWalkable(const World& world, int col, int row) ;
 
         /// Like isWalkable(), but tests this Bot's REAL current (continuous,
         /// possibly off-tile-center) hitbox against every Wall/Bomb using the
@@ -83,7 +83,7 @@ namespace bomberman::logic {
         /// tile. Used everywhere except findEscapeDirection()'s BFS, which
         /// needs to be able to path *through* a dangerous tile to reach a
         /// safe one on the other side of it.
-        [[nodiscard]] bool isSafeToStepInto(const World& world, int col, int row) const;
+        static [[nodiscard]] bool isSafeToStepInto(const World& world, int col, int row) ;
 
         /// Fallback used whenever every direction otherwise looks blocked:
         /// returns the direction that nudges this Bot back towards the
@@ -115,7 +115,7 @@ namespace bomberman::logic {
         /// (claims this tick's move); returns false once the detour is
         /// complete or had to be abandoned, so decideNextMove() falls
         /// through to a fresh, target-agnostic re-evaluation.
-        bool continueDetour(World& world);
+        bool continueDetour(const World& world);
 
         /// Like isImmediateStepSafe(), but tests the step from an explicit
         /// (col, row) departure tile instead of deriving it by rounding

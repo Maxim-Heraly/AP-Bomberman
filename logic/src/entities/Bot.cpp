@@ -123,7 +123,7 @@ void Bot::decideNextMove(World& world) {
     wander(world);
 }
 
-    bool Bot::continueDetour(World& world) {
+    bool Bot::continueDetour(const World& world) {
     if (isCenteredOnTile(getPosition(), detourTargetCol, detourTargetRow)) {
         detouring = false; // Arrived - forget the old target, re-evaluate fresh above.
         return false;
@@ -144,7 +144,7 @@ void Bot::decideNextMove(World& world) {
     return false;
 }
 
-bool Bot::isWalkable(const World& world, int col, int row) const {
+bool Bot::isWalkable(const World& world, int col, int row) {
     if (!inGridBounds(col, row)) return false;
     return findWallAt(world, col, row) == nullptr && findLiveBombAt(world, col, row) == nullptr;
 }
@@ -188,7 +188,7 @@ bool Bot::isWalkable(const World& world, int col, int row) const {
     return true;
 }
 
-bool Bot::isSafeToStepInto(const World& world, int col, int row) const {
+bool Bot::isSafeToStepInto(const World& world, int col, int row) {
     return isWalkable(world, col, row) && !isPositionDangerous(world, gridToWorld(col, row));
 }
 
@@ -221,7 +221,7 @@ Direction Bot::recenteringDirection() const {
     return Direction::None; // Already centered - nothing to correct.
 }
 
-bool Bot::tryFlee(World& world) {
+bool Bot::tryFlee(const World& world) {
     if (!isPositionDangerous(world, getPosition())) {
         fleeDirection = Direction::None; // Not fleeing (anymore) - a future flee should plan fresh.
         return false;
@@ -308,7 +308,7 @@ Direction Bot::findEscapeDirection(const World& world, int startCol, int startRo
     return Direction::None; // Genuinely boxed in on every side - nothing left to do but hope.
 }
 
-void Bot::wander(World& world) {
+void Bot::wander(const World& world) {
     // Nothing urgent to do - wander into a random open neighbour so the Bot
     // keeps exploring the arena instead of standing completely still.
     // Commits to wanderDirection across ticks instead of re-rolling a fresh
@@ -355,7 +355,7 @@ void Bot::wander(World& world) {
     setMovementInput(recenteringDirection()); // Nothing else viable - see recenteringDirection()'s comment.
 }
 
-bool Bot::tryCollectPowerUp(World& world) {
+bool Bot::tryCollectPowerUp(const World& world) {
     constexpr int kDetectionRange = 5; // Tiles - a Bot only "notices" powerups this close.
     const auto [col, row] = worldToGridCoords(getPosition());
 
@@ -475,7 +475,7 @@ bool Bot::tryAttack(World& world) {
     return stepToward(world, targetCol, targetRow);
 }
 
-bool Bot::stepToward(World& world, int targetCol, int targetRow) {
+bool Bot::stepToward(const World& world, int targetCol, int targetRow) {
     const auto [col, row] = worldToGridCoords(getPosition());
     const int dCol = targetCol - col;
     const int dRow = targetRow - row;
