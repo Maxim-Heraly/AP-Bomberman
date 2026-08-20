@@ -13,7 +13,7 @@ class PowerUpView : public EntityView {
 public:
     explicit PowerUpView(std::shared_ptr<const logic::PowerUp> model,
                          std::shared_ptr<sf::Texture> texture,
-                         std::array<sf::IntRect, 2> animationFrames);
+                         const std::array<sf::IntRect, 2> &animationFrames);
 
     void onNotify(const logic::Subject& source, logic::EventType event) override;
     void draw(sf::RenderWindow& window, const Camera& camera) override;

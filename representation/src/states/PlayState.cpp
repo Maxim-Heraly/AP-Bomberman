@@ -10,16 +10,16 @@ namespace bomberman::representation {
 
 PlayState::PlayState(StateManager& manager)
     : State(manager),
-      score(logic::Score::getInstance()),
       factory(std::make_shared<ConcreteFactory>()),
       world(factory),
+      score(logic::Score::getInstance()),
       camera(900, 690) {
     world.initialize();
     AudioManager::getInstance().playGameplayMusic();
 }
 
 namespace {
-    logic::Direction keyToDirection(sf::Keyboard::Key key) {
+    logic::Direction keyToDirection(const sf::Keyboard::Key key) {
         switch (key) {
             case sf::Keyboard::Up: return logic::Direction::Up;
             case sf::Keyboard::Down: return logic::Direction::Down;
@@ -31,7 +31,12 @@ namespace {
 
 void PlayState::handleEvent(const sf::Event& event) {
     const auto player = world.getPlayer();
-    if (!player || world.isGameOver()) return;
+    if (!player) return;
+    if (world.isGameOver()) {
+        constexpr auto direction = logic::Direction::None;
+        player->setMovementInput(direction);
+        return;
+    }
 
     if (event.type == sf::Event::KeyPressed) {
         if (event.key.code == sf::Keyboard::Space) {
@@ -53,7 +58,7 @@ void PlayState::handleEvent(const sf::Event& event) {
     }
 }
 
-void PlayState::update(float deltaTime) {
+void PlayState::update(const float deltaTime) {
     world.update(deltaTime);
 
     for (const auto& view : factory->getViews()) {

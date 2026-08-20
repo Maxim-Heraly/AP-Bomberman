@@ -19,7 +19,7 @@ namespace bomberman::representation {
         }
     }
 
-    void ScoreView::draw(sf::RenderWindow& window, int x, int y) const {
+    void ScoreView::draw(sf::RenderWindow& window, const int x, const int y) const {
         updateText();
         scoreText.setPosition(static_cast<float>(x), static_cast<float>(y));
         window.draw(scoreText);

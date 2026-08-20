@@ -23,7 +23,7 @@ class CharacterView : public EntityView {
 public:
     CharacterView(std::shared_ptr<const logic::Character> model,
                   std::shared_ptr<sf::Texture> texture,
-                  CharacterAnimationSet animationSet);
+                  const CharacterAnimationSet &animationSet);
     void update(float deltaTime) override;
 
     void onNotify(const logic::Subject& source, logic::EventType event) override;

@@ -16,7 +16,7 @@ class EntityView : public logic::Observer {
 public:
     ~EntityView() override = default;
 
-    virtual void update(float deltaTime) {(void)deltaTime;}
+    virtual void update(const float deltaTime) {(void)deltaTime;}
     virtual void draw(sf::RenderWindow& window, const Camera& camera) = 0;
 
     [[nodiscard]] bool isMarkedForRemoval() const { return markedForRemoval; }

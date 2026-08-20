@@ -1,5 +1,6 @@
 #include "representation/views/BombView.hpp"
 #include <algorithm>
+#include "logic/utils/Direction.hpp"
 
 namespace bomberman::representation {
 
@@ -87,7 +88,7 @@ namespace bomberman::representation {
     BombView::BombView(std::shared_ptr<const logic::Bomb> model,
                        std::shared_ptr<sf::Texture> texture,
                        BombAnimationSet animations)
-        : model(std::move(model)), texture(std::move(texture)), animations(std::move(animations)) {
+        : model(std::move(model)), texture(std::move(texture)), animations(animations) {
         sprite.setTexture(*this->texture);
     }
 

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "logic/entities/Bomb.hpp"
-#include "logic/utils/Direction.hpp"
 #include "representation/views/EntityView.hpp"
 #include <memory>
 #include <array>

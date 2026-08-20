@@ -137,7 +137,7 @@ void CharacterView::setDead() {
     frameIndex = 0;
 }
 
-void CharacterView::onNotify(const logic::Subject& source, logic::EventType event) {
+void CharacterView::onNotify(const logic::Subject& source, const logic::EventType event) {
     (void)source;
     if (event == logic::EventType::Died) {
         setDead();
@@ -149,8 +149,8 @@ void CharacterView::onNotify(const logic::Subject& source, logic::EventType even
 
 CharacterView::CharacterView(std::shared_ptr<const logic::Character> model,
                              std::shared_ptr<sf::Texture> texture,
-                             CharacterAnimationSet animationSet)
-    : model(std::move(model)), texture(std::move(texture)), animationSet(std::move(animationSet)) {
+                             const CharacterAnimationSet &animationSet)
+    : model(std::move(model)), texture(std::move(texture)), animationSet(animationSet) {
     sprite.setTexture(*this->texture);
 }
 

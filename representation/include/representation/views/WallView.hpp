@@ -20,7 +20,7 @@ class WallView : public EntityView {
 public:
     WallView(std::shared_ptr<const logic::Wall> model,
              std::shared_ptr<sf::Texture> texture,
-             WallAnimationSet animationSet);
+             const WallAnimationSet &animationSet);
 
     void onNotify(const logic::Subject& source, logic::EventType event) override;
     void draw(sf::RenderWindow& window, const Camera& camera) override;

@@ -14,7 +14,7 @@ namespace bomberman::representation {
         }
     }
 
-    std::array<sf::IntRect, 2> PowerUpView::getPowerUpAnimation(PowerUpSpriteVariant variant) {
+    std::array<sf::IntRect, 2> PowerUpView::getPowerUpAnimation(const PowerUpSpriteVariant variant) {
         switch (variant) {
             case PowerUpSpriteVariant::Fire:
                 return {rect(16, 0), rect(16, 16)};
@@ -29,12 +29,12 @@ namespace bomberman::representation {
 
     PowerUpView::PowerUpView(std::shared_ptr<const logic::PowerUp> model,
                              std::shared_ptr<sf::Texture> texture,
-                             std::array<sf::IntRect, 2> animation)
-        : model(std::move(model)), texture(std::move(texture)), animationFrames(animation) {
+                             const std::array<sf::IntRect, 2> &animationFrames)
+        : model(std::move(model)), texture(std::move(texture)), animationFrames(animationFrames) {
         sprite.setTexture(*this->texture);
     }
 
-    void PowerUpView::onNotify(const logic::Subject& /*source*/, logic::EventType event) {
+    void PowerUpView::onNotify(const logic::Subject& /*source*/, const logic::EventType event) {
     if (event == logic::EventType::PowerUpCollected) {
         markedForRemoval = true;
     }

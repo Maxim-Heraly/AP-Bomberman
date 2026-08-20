@@ -38,12 +38,12 @@ namespace bomberman::representation {
 
     WallView::WallView(std::shared_ptr<const Wall> model,
                        std::shared_ptr<sf::Texture> texture,
-                       WallAnimationSet animationSet)
+                       const WallAnimationSet &animationSet)
         : model(std::move(model)), texture(std::move(texture)), animationSet(animationSet) {
         sprite.setTexture(*this->texture);
     }
 
-    void WallView::onNotify(const Subject& /*source*/, EventType event) {
+    void WallView::onNotify(const Subject& /*source*/, const EventType event) {
         if (event == EventType::BlockDestroyed) {
             breaking = true;
         }
@@ -59,7 +59,7 @@ namespace bomberman::representation {
         }
 
         const Vector2 screenPos = camera.worldToScreen(model->getPosition());
-        Vector2 screenSize = camera.worldSizeToScreen(model->getSize());
+        const Vector2 screenSize = camera.worldSizeToScreen(model->getSize());
 
         sprite.setTexture(*this->texture);
         sprite.setTextureRect(breaking ? animationSet.breaking[std::min(static_cast<std::size_t>(breakTimer / (kBreakDuration / animationSet.breaking.size())), animationSet.breaking.size() - 1)] : animationSet.idle[0]);
