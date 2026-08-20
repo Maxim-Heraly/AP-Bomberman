@@ -5,7 +5,6 @@
 #include "logic/entities/PowerUp.hpp"
 #include "logic/entities/Wall.hpp"
 #include "logic/utils/Random.hpp"
-#include "logic/utils/Grid.hpp"
 #include <algorithm>
 #include <fstream>
 #include <sstream>
@@ -35,7 +34,7 @@ namespace {
                            bomb->getPosition(), bomb->getSize());
     }
 
-    std::size_t dirIndex(Direction direction) {
+    std::size_t dirIndex(const Direction direction) {
         switch (direction) {
             case Direction::Up: return 0;
             case Direction::Down: return 1;
@@ -46,7 +45,7 @@ namespace {
         return 1;
     }
 
-    Vector2 stepOffset(Direction direction, float step) {
+    Vector2 stepOffset(const Direction direction, float step) {
         switch (direction) {
             case Direction::Up: return {0.f, -step};
             case Direction::Down: return {0.f, step};
@@ -58,7 +57,7 @@ namespace {
     }
 
     struct BlastTile : EntityModel {
-        BlastTile(Vector2 position, Vector2 size) : EntityModel(position, size) {}
+        BlastTile(const Vector2 position, const Vector2 size) : EntityModel(position, size) {}
         void update(float /*deltaTime*/) override {}
     };
 }
@@ -69,7 +68,7 @@ void World::initialize() {
     generateArena();
 }
 
-void World::update(float deltaTime) {
+void World::update(const float deltaTime) {
     if (!gameOver) {
         tickTimer += deltaTime;
 
@@ -165,7 +164,7 @@ void World::placeBomb(Character& owner) {
     pos.x = -1.0f + (std::round((pos.x + 1.0f - tileWidth * 0.5f) / tileWidth) + 0.5f) * tileWidth;
     pos.y = -1.0f + (std::round((pos.y + 1.0f - tileHeight * 0.5f) / tileHeight) + 0.5f) * tileHeight;
 
-    auto bomb = factory->createBomb(pos, ownerPtr);
+    const auto bomb = factory->createBomb(pos, ownerPtr);
     if (!bomb) {
         owner.onBombExploded();
         return;
@@ -261,7 +260,7 @@ void World::handleCollisions() const {
 
     for (const auto& bomb : bombs) {
         if (!bomb->canOwnerPassThrough()) continue;
-        auto owner = bomb->getOwner().lock();
+        const auto owner = bomb->getOwner().lock();
         if (!owner) continue;
         if (!owner->intersects(*bomb)) {
             bomb->disableOwnerPassThrough();
@@ -310,7 +309,7 @@ void World::handleCollisions() const {
 }
 
 void World::explode(Bomb& bomb) {
-    auto start = std::find_if(entities.begin(), entities.end(),
+    const auto start = std::find_if(entities.begin(), entities.end(),
         [&bomb](const std::shared_ptr<EntityModel>& entity) {
             auto candidate = std::dynamic_pointer_cast<Bomb>(entity);
             return candidate && candidate.get() == &bomb;
@@ -318,11 +317,11 @@ void World::explode(Bomb& bomb) {
 
     if (start == entities.end()) return;
 
-    auto startBomb = std::dynamic_pointer_cast<Bomb>(*start);
+    const auto startBomb = std::dynamic_pointer_cast<Bomb>(*start);
     if (!startBomb) return;
 
-    auto owner = startBomb->getOwner().lock();
-    bool ownerIsPlayer = owner && owner == player;
+    const auto owner = startBomb->getOwner().lock();
+    const bool ownerIsPlayer = owner && owner == player;
 
     std::unordered_set<const Bomb*> processedBombs;
 
@@ -335,7 +334,7 @@ void World::explode(Bomb& bomb) {
             const Vector2 stepSize = currentBomb->getSize();
             const int radius = std::max(1, currentBomb->getRadius());
 
-            for (Direction direction : {Direction::Up, Direction::Down, Direction::Left, Direction::Right}) {
+            for (const Direction direction : {Direction::Up, Direction::Down, Direction::Left, Direction::Right}) {
                 const std::size_t index = dirIndex(direction);
                 int visibleReach = 0;
                 bool hasNaturalEnd = false;
@@ -350,14 +349,14 @@ void World::explode(Bomb& bomb) {
                         if (!entity || entity.get() == currentBomb.get()) continue;
                         if (!entity->intersects(blastTile)) continue;
 
-                        if (auto wall = std::dynamic_pointer_cast<Wall>(entity)) {
+                        if (const auto wall = std::dynamic_pointer_cast<Wall>(entity)) {
                             if (wall->isDestructible()) {
                                 wall->destroy();
                                 if (ownerIsPlayer) {
                                     owner->declareBlockDestroyed();
                                 }
                                 if (Random::getInstance().chance(0.2f)) {
-                                    auto chance = Random::getInstance().getInt(1,3);
+                                    const auto chance = Random::getInstance().getInt(1,3);
                                     PowerUpType type;
                                     if (chance == 1) { type = PowerUpType::Fire;}
                                     if (chance == 2) { type = PowerUpType::ExtraBomb; }
@@ -371,7 +370,7 @@ void World::explode(Bomb& bomb) {
                             blockedByWall = true;
                             break;
                         }
-                        if (auto otherBomb = std::dynamic_pointer_cast<Bomb>(entity)) {
+                        if (const auto otherBomb = std::dynamic_pointer_cast<Bomb>(entity)) {
                             if (!otherBomb->hasExploded()) {
                                 otherBomb->detonateEarly();
                                 otherBomb->update(0.f);
@@ -379,14 +378,14 @@ void World::explode(Bomb& bomb) {
                             explodeBomb(otherBomb);
                             continue;
                         }
-                        if (auto character = std::dynamic_pointer_cast<Character>(entity)) {
+                        if (const auto character = std::dynamic_pointer_cast<Character>(entity)) {
                             if (character != player && ownerIsPlayer) {
                                 character->declareEnemyKilled();
                             }
                             character->die();
                             continue;
                         }
-                        if (auto powerUp = std::dynamic_pointer_cast<PowerUp>(entity)) {
+                        if (const auto powerUp = std::dynamic_pointer_cast<PowerUp>(entity)) {
                             powerUp->remove();
                             continue;
                         }

@@ -42,9 +42,9 @@ public:
     }
 
     // --- Power-up hooks -------------------------------------------------
-    void increaseBombRadius(int amount) { bombRadius += amount; }
-    void increaseMaxBombs(int amount) { maxBombs += amount; }
-    void increaseSpeed(float amount) { speed += amount; }
+    void increaseBombRadius(const int amount) { bombRadius += amount; }
+    void increaseMaxBombs(const int amount) { maxBombs += amount; }
+    void increaseSpeed(const float amount) { speed += amount; }
 
     [[nodiscard]] int getBombRadius() const { return bombRadius; }
     [[nodiscard]] int getMaxBombs() const { return maxBombs; }
@@ -55,7 +55,7 @@ public:
     /// Called each frame by Game/PlayState (for the Player, translated from
     /// arrow-key presses) or by the bot AI (for a Bot) to queue up a
     /// movement direction for the next update().
-    void setMovementInput(Direction direction) { movementInput = direction; }
+    void setMovementInput(const Direction direction) { movementInput = direction; }
 
     void declareEnemyKilled() { notify(EventType::EnemyKilled); }
     void collectPowerUp() { notify(EventType::PlayerCollectedPowerUp); }

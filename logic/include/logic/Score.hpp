@@ -31,7 +31,7 @@ public:
     void onNotify(const Subject &source, EventType event) override;
 
     [[nodiscard]] int getCurrentScore() const { return currentScore; }
-    void setCurrentScore(int score) { currentScore = score; }
+    void setCurrentScore(const int score) { currentScore = score; }
     void addEnemyKilled() { currentScore += 100; }
     void addBlockDestroyed() { currentScore += 10; }
     void addPowerUpCollected() { currentScore += 25; }

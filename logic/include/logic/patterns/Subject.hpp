@@ -35,9 +35,9 @@ protected:
     /// Notify every still-alive Observer. Call this from subclasses whenever
     /// their state changes in a way Views/Score should know about, e.g.
     /// `notify(EventType::Moved);` at the end of Character::update().
-    void notify(EventType event) {
+    void notify(const EventType event) {
         for (auto it = observers.begin(); it != observers.end();) {
-            if (auto observer = it->lock()) {
+            if (const auto observer = it->lock()) {
                 observer->onNotify(*this, event);
                 ++it;
             } else {

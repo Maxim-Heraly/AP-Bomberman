@@ -15,7 +15,7 @@ namespace bomberman::logic {
  */
 class EntityModel : public Subject {
 public:
-    EntityModel(Vector2 posiotion, Vector2 size, Vector2 hitbox) : position(posiotion), size(size), hitbox(hitbox) {}
+    EntityModel(Vector2 position, Vector2 size, Vector2 hitbox) : position(position), size(size), hitbox(hitbox) {}
     EntityModel(Vector2 position, Vector2 size) : EntityModel(position, size, size) {}
     ~EntityModel() override = default;
 

@@ -9,7 +9,7 @@ namespace bomberman::logic {
 /// since it needs the AbstractFactory to create the PowerUp.
 class Wall : public EntityModel {
 public:
-    Wall(Vector2 position, Vector2 size, bool destructible)
+    Wall(const Vector2 position, const Vector2 size, const bool destructible)
         : EntityModel(position, size), destructible(destructible) {}
 
     void update(float /*deltaTime*/) override {} // Walls are static, nothing to tick.

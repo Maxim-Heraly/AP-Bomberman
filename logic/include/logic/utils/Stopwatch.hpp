@@ -29,7 +29,7 @@ public:
     }
 
     /// Seconds elapsed since the previous tick() call.
-    float getDeltaTime() const { return deltaTime; }
+    [[nodiscard]] float getDeltaTime() const { return deltaTime; }
 
 private:
     using Clock = std::chrono::steady_clock;

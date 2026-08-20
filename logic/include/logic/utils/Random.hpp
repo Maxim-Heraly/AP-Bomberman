@@ -21,20 +21,20 @@ public:
     Random& operator=(const Random&) = delete;
 
     /// Random integer in [min, max], inclusive.
-    int getInt(int min, int max) {
+    int getInt(const int min, const int max) {
         std::uniform_int_distribution<int> dist(min, max);
         return dist(engine);
     }
 
     /// Random float in [min, max).
-    float getFloat(float min, float max) {
+    float getFloat(const float min, const float max) {
         std::uniform_real_distribution<float> dist(min, max);
         return dist(engine);
     }
 
     /// Returns true with the given probability (0.0 - 1.0), e.g. useful for
     /// "25% chance of spawning a powerup".
-    bool chance(float probability) {
+    bool chance(const float probability) {
         return getFloat(0.f, 1.f) < probability;
     }
 

@@ -29,19 +29,19 @@ namespace {
         return {col, row};
     }
 
-    Vector2 gridToWorld(int col, int row) {
+    Vector2 gridToWorld(const int col, const int row) {
         return {-1.f + kTileWidth * 0.5f + static_cast<float>(col) * kTileWidth,
                 -1.f + kTileHeight * 0.5f + static_cast<float>(row) * kTileHeight};
     }
 
-    bool isCenteredOnTile(const Vector2& position, int col, int row) {
+    bool isCenteredOnTile(const Vector2& position, const int col, const int row) {
         const Vector2 anchor = gridToWorld(col, row);
         constexpr float kCenterArrivalTolerance = 0.01f; // Mirrors recenteringDirection()'s tolerance.
         return std::abs(position.x - anchor.x) < kCenterArrivalTolerance &&
                std::abs(position.y - anchor.y) < kCenterArrivalTolerance;
     }
 
-    bool inGridBounds(int col, int row) {
+    bool inGridBounds(const int col, const int row) {
         return col >= 0 && col < kArenaColumns && row >= 0 && row < kArenaRows;
     }
 
@@ -144,7 +144,7 @@ void Bot::decideNextMove(World& world) {
     return false;
 }
 
-bool Bot::isWalkable(const World& world, int col, int row) {
+bool Bot::isWalkable(const World& world, const int col, const int row) {
     if (!inGridBounds(col, row)) return false;
     return findWallAt(world, col, row) == nullptr && findLiveBombAt(world, col, row) == nullptr;
 }
@@ -165,12 +165,12 @@ bool Bot::isWalkable(const World& world, int col, int row) {
 // idealized one - requires testing the Bot's ACTUAL current position (not a
 // rounded/anchored stand-in) against every Wall/Bomb with the same
 // axis-aligned overlap test World::handleCollisions() itself uses.
-    bool Bot::isImmediateStepSafe(const World& world, Direction direction) const {
+    bool Bot::isImmediateStepSafe(const World& world, const Direction direction) const {
     const auto [col, row] = worldToGridCoords(getPosition());
     return isImmediateStepSafeFrom(world, direction, col, row);
 }
 
-    bool Bot::isImmediateStepSafeFrom(const World& world, Direction direction, int col, int row) const {
+    bool Bot::isImmediateStepSafeFrom(const World& world, const Direction direction, const int col, const int row) const {
     const Vector2 step = directionToVector(direction);
     const Vector2 canonicalTarget = gridToWorld(col + static_cast<int>(step.x), row + static_cast<int>(step.y));
     const Vector2 candidate = (step.x != 0.f)
@@ -179,16 +179,16 @@ bool Bot::isWalkable(const World& world, int col, int row) {
 
     for (const auto& entity : world.getEntities()) {
         if (!entity->isAlive()) continue;
-        if (auto wall = std::dynamic_pointer_cast<Wall>(entity)) {
+        if (const auto wall = std::dynamic_pointer_cast<Wall>(entity)) {
             if (wouldOverlap(candidate, getSize(), wall->getPosition(), wall->getSize())) return false;
-        } else if (auto bomb = std::dynamic_pointer_cast<Bomb>(entity)) {
+        } else if (const auto bomb = std::dynamic_pointer_cast<Bomb>(entity)) {
             if (!bomb->hasExploded() && wouldOverlap(candidate, getSize(), bomb->getPosition(), bomb->getSize())) return false;
         }
     }
     return true;
 }
 
-bool Bot::isSafeToStepInto(const World& world, int col, int row) {
+bool Bot::isSafeToStepInto(const World& world, const int col, const int row) {
     return isWalkable(world, col, row) && !isPositionDangerous(world, gridToWorld(col, row));
 }
 
@@ -366,7 +366,7 @@ bool Bot::tryCollectPowerUp(const World& world) {
     bool found = false;
 
     for (const auto& entity : world.getEntities()) {
-        auto powerUp = std::dynamic_pointer_cast<PowerUp>(entity);
+        const auto powerUp = std::dynamic_pointer_cast<PowerUp>(entity);
         if (!powerUp || !powerUp->isAlive()) continue;
 
         const auto [pCol, pRow] = worldToGridCoords(powerUp->getPosition());
@@ -408,7 +408,7 @@ bool Bot::tryBreakWalls(World& world) {
     // which never gated its own stepToward() on canPlaceBomb() either).
     if (canPlaceBomb()) {
         for (const auto& [dCol, dRow] : kGridOffsets) {
-            if (auto wall = findWallAt(world, col + dCol, row + dRow)) {
+            if (const auto wall = findWallAt(world, col + dCol, row + dRow)) {
                 if (wall->isDestructible()) {
                     world.placeBomb(*this);
                     return true;
@@ -427,7 +427,7 @@ bool Bot::tryBreakWalls(World& world) {
     bool found = false;
 
     for (const auto& entity : world.getEntities()) {
-        auto wall = std::dynamic_pointer_cast<Wall>(entity);
+        const auto wall = std::dynamic_pointer_cast<Wall>(entity);
         if (!wall || !wall->isAlive() || !wall->isDestructible()) continue;
 
         const auto [wCol, wRow] = worldToGridCoords(wall->getPosition());
@@ -533,7 +533,7 @@ bool Bot::stepToward(const World& world, int targetCol, int targetRow) {
                 ? std::array<Direction, 2>{Direction::Left, Direction::Right}
             : std::array<Direction, 2>{Direction::Up, Direction::Down};
 
-            for (Direction side : perpendicular) {
+            for (const Direction side : perpendicular) {
                 const Vector2 offset = directionToVector(side);
                 const int sCol = col + static_cast<int>(offset.x);
                 const int sRow = row + static_cast<int>(offset.y);

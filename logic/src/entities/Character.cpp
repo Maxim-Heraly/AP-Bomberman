@@ -4,12 +4,12 @@
 namespace bomberman::logic {
 
     namespace {
-        constexpr float kHitboxScale = 0.8f;
+        constexpr float kHitboxScale = 0.9f;
     }
 
-Character::Character(Vector2 position, Vector2 size) : EntityModel(position, size, size*kHitboxScale) {}
+Character::Character(const Vector2 position, const Vector2 size) : EntityModel(position, size, size*kHitboxScale) {}
 
-void Character::update(float deltaTime) {
+void Character::update(const float deltaTime) {
     previousPosition = position;
     const Vector2 movement = directionToVector(movementInput);
     if (movement.x == 0.f && movement.y == 0.f) return;

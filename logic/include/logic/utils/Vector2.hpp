@@ -11,7 +11,7 @@ struct Vector2 {
     float y{0.f};
 
     Vector2() = default;
-    Vector2(float x_, float y_) : x(x_), y(y_) {}
+    Vector2(const float x_, const float y_) : x(x_), y(y_) {}
 
     Vector2 operator+(const Vector2& other) const { return {x + other.x, y + other.y}; }
     Vector2 operator-(const Vector2& other) const { return {x - other.x, y - other.y}; }

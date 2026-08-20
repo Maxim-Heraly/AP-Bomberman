@@ -26,7 +26,7 @@ public:
     void disableOwnerPassThrough() { ownerCanPassThrough = false; }
 
     [[nodiscard]] const BlastProfile& getBlastProfile() const { return blastProfile; }
-    void setBlastProfile(BlastProfile profile) { blastProfile = profile; }
+    void setBlastProfile(const BlastProfile &profile) { blastProfile = profile; }
 
     void detonateEarly() { fuseRemaining = 0.f; }
 

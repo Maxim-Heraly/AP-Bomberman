@@ -10,7 +10,7 @@ class Character;
 /// Subclasses only need to implement applyEffect().
 class PowerUp : public EntityModel {
 public:
-    PowerUp(Vector2 position, Vector2 size) : EntityModel(position, size) {}
+    PowerUp(const Vector2 position, const Vector2 size) : EntityModel(position, size) {}
 
     void update(float /*deltaTime*/) override {} // Power-ups are static until collected.
 

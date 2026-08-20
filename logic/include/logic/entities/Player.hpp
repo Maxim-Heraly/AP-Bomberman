@@ -9,7 +9,7 @@ namespace bomberman::logic {
 /// Game/PlayState - so this class itself stays input-library-agnostic.
 class Player : public Character {
 public:
-    Player(Vector2 position, Vector2 size) : Character(position, size) {}
+    Player(const Vector2 position, const Vector2 size) : Character(position, size) {}
 
 };
 

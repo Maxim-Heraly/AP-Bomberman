@@ -5,7 +5,7 @@
 #include <iostream>
 
 namespace bomberman::logic {
-    void Score::onNotify(const Subject &source, EventType event) {
+    void Score::onNotify(const Subject &source, const EventType event) {
         switch (event) {
             case EventType::PlayerDestroyedBlock:
                 addBlockDestroyed();

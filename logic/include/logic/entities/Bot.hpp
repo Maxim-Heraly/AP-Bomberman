@@ -27,7 +27,7 @@ namespace bomberman::logic {
      */
     class Bot : public Character {
     public:
-        Bot(Vector2 position, Vector2 size) : Character(position, size) {}
+        Bot(const Vector2 position, const Vector2 size) : Character(position, size) {}
 
         /// Called once per tick (by World::update(), before entities are
         /// updated) - inspects the World and calls setMovementInput() /
@@ -69,7 +69,7 @@ namespace bomberman::logic {
 
         /// True if (col, row) is inside the arena and has no Wall or live
         /// Bomb standing on it.
-        static [[nodiscard]] bool isWalkable(const World& world, int col, int row) ;
+        static bool isWalkable(const World& world, int col, int row) ;
 
         /// Like isWalkable(), but tests this Bot's REAL current (continuous,
         /// possibly off-tile-center) hitbox against every Wall/Bomb using the
@@ -83,7 +83,7 @@ namespace bomberman::logic {
         /// tile. Used everywhere except findEscapeDirection()'s BFS, which
         /// needs to be able to path *through* a dangerous tile to reach a
         /// safe one on the other side of it.
-        static [[nodiscard]] bool isSafeToStepInto(const World& world, int col, int row) ;
+        static bool isSafeToStepInto(const World& world, int col, int row) ;
 
         /// Fallback used whenever every direction otherwise looks blocked:
         /// returns the direction that nudges this Bot back towards the

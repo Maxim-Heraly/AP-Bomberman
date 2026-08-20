@@ -3,7 +3,7 @@
 
 namespace bomberman::logic {
 
-    Bomb::Bomb(Vector2 position, Vector2 size, std::weak_ptr<Character> owner, int radius)
+    Bomb::Bomb(const Vector2 position, const Vector2 size, std::weak_ptr<Character> owner, const int radius)
         : EntityModel(position, size), owner(std::move(owner)), radius(radius) {}
 
     void Bomb::update(float deltaTime) {
