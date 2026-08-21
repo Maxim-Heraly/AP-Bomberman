@@ -18,17 +18,14 @@ class Subject {
 public:
     virtual ~Subject() = default;
 
-    void attach(const std::shared_ptr<Observer>& observer) {
-        observers.push_back(observer);
-    }
+    void attach(const std::shared_ptr<Observer>& observer) { observers.push_back(observer); }
 
     void detach(const std::shared_ptr<Observer>& observer) {
-        observers.erase(
-            std::remove_if(observers.begin(), observers.end(),
-                [&observer](const std::weak_ptr<Observer>& weak) {
-                    return weak.expired() || weak.lock() == observer;
-                }),
-            observers.end());
+        observers.erase(std::remove_if(observers.begin(), observers.end(),
+                                       [&observer](const std::weak_ptr<Observer>& weak) {
+                                           return weak.expired() || weak.lock() == observer;
+                                       }),
+                        observers.end());
     }
 
 protected:

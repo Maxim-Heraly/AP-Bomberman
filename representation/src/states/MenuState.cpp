@@ -1,7 +1,7 @@
 #include "representation/states/MenuState.hpp"
+#include "representation/AudioManager.hpp"
 #include "representation/states/PlayState.hpp"
 #include "representation/states/StateManager.hpp"
-#include "representation/AudioManager.hpp"
 #include <sstream>
 
 namespace bomberman::representation {
@@ -35,8 +35,7 @@ void MenuState::render(sf::RenderWindow& window) {
     const sf::Vector2u windowSize = window.getSize();
     const float centerX = static_cast<float>(windowSize.x) * 0.5f;
     sf::Font font;
-    if (!font.loadFromFile("../../assets/fonts/PublicPixel-rv0pA.ttf"))
-    {
+    if (!font.loadFromFile("../../assets/fonts/PublicPixel-rv0pA.ttf")) {
         std::printf("Failed to load font\n");
     }
     sf::Text title("BOMBERMAN", font, 42);

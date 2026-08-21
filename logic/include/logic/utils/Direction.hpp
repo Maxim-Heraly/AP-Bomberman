@@ -12,11 +12,16 @@ enum class Direction { Up, Down, Left, Right, None };
 /// vector you can scale by speed * deltaTime, e.g. in Character::update().
 inline Vector2 directionToVector(const Direction direction) {
     switch (direction) {
-        case Direction::Up:    return {0.f, -1.f};
-        case Direction::Down:  return {0.f, 1.f};
-        case Direction::Left:  return {-1.f, 0.f};
-        case Direction::Right: return {1.f, 0.f};
-        case Direction::None:  return {0.f, 0.f};
+    case Direction::Up:
+        return {0.f, -1.f};
+    case Direction::Down:
+        return {0.f, 1.f};
+    case Direction::Left:
+        return {-1.f, 0.f};
+    case Direction::Right:
+        return {1.f, 0.f};
+    case Direction::None:
+        return {0.f, 0.f};
     }
     return {0.f, 0.f};
 }

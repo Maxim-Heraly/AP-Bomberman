@@ -21,7 +21,7 @@ public:
 
     [[nodiscard]] const Vector2& getPosition() const { return position; }
     [[nodiscard]] const Vector2& getSize() const { return size; }
-    [[nodiscard]] const Vector2& getHitbox() const {return hitbox;}
+    [[nodiscard]] const Vector2& getHitbox() const { return hitbox; }
 
     [[nodiscard]] bool isAlive() const { return alive; }
 

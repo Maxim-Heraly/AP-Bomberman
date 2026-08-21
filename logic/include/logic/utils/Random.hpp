@@ -34,9 +34,7 @@ public:
 
     /// Returns true with the given probability (0.0 - 1.0), e.g. useful for
     /// "25% chance of spawning a powerup".
-    bool chance(const float probability) {
-        return getFloat(0.f, 1.f) < probability;
-    }
+    bool chance(const float probability) { return getFloat(0.f, 1.f) < probability; }
 
 private:
     Random() : engine(std::random_device{}()) {}

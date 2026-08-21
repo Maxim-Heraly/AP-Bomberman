@@ -3,23 +3,22 @@
 
 namespace bomberman::logic {
 
-    namespace {
-        constexpr float kHitboxScale = 0.9f;
-    }
+namespace {
+constexpr float kHitboxScale = 0.9f;
+}
 
-Character::Character(const Vector2 position, const Vector2 size) : EntityModel(position, size, size*kHitboxScale) {}
+Character::Character(const Vector2 position, const Vector2 size) : EntityModel(position, size, size * kHitboxScale) {}
 
 void Character::update(const float deltaTime) {
     previousPosition = position;
     const Vector2 movement = directionToVector(movementInput);
-    if (movement.x == 0.f && movement.y == 0.f) return;
+    if (movement.x == 0.f && movement.y == 0.f)
+        return;
     position += movement * speed * deltaTime;
     facing = movementInput;
     notify(EventType::Moved);
 }
 
-bool Character::canPlaceBomb() const {
-    return bombsPlaced < maxBombs;
-}
+bool Character::canPlaceBomb() const { return bombsPlaced < maxBombs; }
 
 } // namespace bomberman::logic

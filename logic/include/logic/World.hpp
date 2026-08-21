@@ -1,7 +1,7 @@
 #pragma once
 
-#include "logic/patterns/AbstractFactory.hpp"
 #include "Score.hpp"
+#include "logic/patterns/AbstractFactory.hpp"
 #include <memory>
 #include <vector>
 

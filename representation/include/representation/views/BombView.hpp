@@ -2,8 +2,8 @@
 
 #include "logic/entities/Bomb.hpp"
 #include "representation/views/EntityView.hpp"
-#include <memory>
 #include <array>
+#include <memory>
 
 namespace bomberman::representation {
 
@@ -20,11 +20,9 @@ struct BombAnimationSet {
 
 BombAnimationSet makeBombAnimationSet();
 
-
 class BombView : public EntityView {
 public:
-    BombView(std::shared_ptr<const logic::Bomb> model,
-             std::shared_ptr<sf::Texture> texture,
+    BombView(std::shared_ptr<const logic::Bomb> model, std::shared_ptr<sf::Texture> texture,
              BombAnimationSet animations);
 
     void onNotify(const logic::Subject& source, logic::EventType event) override;
@@ -34,8 +32,8 @@ public:
 private:
     enum class Phase { Fuse, Explosion, Done };
 
-    void drawFrame(sf::RenderWindow& window, const Camera& camera,
-                   const sf::IntRect& frame, const logic::Vector2& worldPos) const;
+    void drawFrame(sf::RenderWindow& window, const Camera& camera, const sf::IntRect& frame,
+                   const logic::Vector2& worldPos) const;
 
     std::shared_ptr<const logic::Bomb> model;
     std::shared_ptr<sf::Texture> texture;

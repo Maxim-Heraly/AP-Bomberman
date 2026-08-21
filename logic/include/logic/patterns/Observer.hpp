@@ -12,18 +12,18 @@ class Subject;
  * updating the player's score).
  */
 enum class EventType {
-    Tick,               // Emitted every update step, mainly so Views stay in sync each frame.
-    Moved,               // Entity changed position and/or facing direction.
-    BombPlaced,           // A Character placed a new Bomb.
-    BombExploded,          // A Bomb finished its countdown and exploded.
-    BlockDestroyed,        // A destructible Wall was destroyed by an explosion.
+    Tick,                   // Emitted every update step, mainly so Views stay in sync each frame.
+    Moved,                  // Entity changed position and/or facing direction.
+    BombPlaced,             // A Character placed a new Bomb.
+    BombExploded,           // A Bomb finished its countdown and exploded.
+    BlockDestroyed,         // A destructible Wall was destroyed by an explosion.
     PowerUpCollected,       // A Character walked over and collected a PowerUp.
-    Died,                    // An Entity (Character) was caught in an explosion.
-    PlayerWon,                // The human Player is the last one standing.
-    PlayerLost,                 // The human Player died.
-    PlayerCollectedPowerUp,     // scoring events
-    PlayerDestroyedBlock,       // ||
-    EnemyKilled                 // ||
+    Died,                   // An Entity (Character) was caught in an explosion.
+    PlayerWon,              // The human Player is the last one standing.
+    PlayerLost,             // The human Player died.
+    PlayerCollectedPowerUp, // scoring events
+    PlayerDestroyedBlock,   // ||
+    EnemyKilled             // ||
 };
 
 /**

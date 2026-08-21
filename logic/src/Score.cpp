@@ -5,29 +5,29 @@
 #include <iostream>
 
 namespace bomberman::logic {
-    void Score::onNotify(const Subject &source, const EventType event) {
-        switch (event) {
-            case EventType::PlayerDestroyedBlock:
-                addBlockDestroyed();
-                break;
-            case EventType::PlayerCollectedPowerUp:
-                addPowerUpCollected();
-                break;
-            case EventType::EnemyKilled:
-                addEnemyKilled();
-                break;
-            case EventType::PlayerWon:
-                addPlayerWon();
-                break;
-            case EventType::PlayerLost:
-                addPlayerLost();
-                break;
-            default:
-                break; // Moved / BombPlaced / BombExploded / Died aren't scored directly
-        }
+void Score::onNotify(const Subject& source, const EventType event) {
+    switch (event) {
+    case EventType::PlayerDestroyedBlock:
+        addBlockDestroyed();
+        break;
+    case EventType::PlayerCollectedPowerUp:
+        addPowerUpCollected();
+        break;
+    case EventType::EnemyKilled:
+        addEnemyKilled();
+        break;
+    case EventType::PlayerWon:
+        addPlayerWon();
+        break;
+    case EventType::PlayerLost:
+        addPlayerLost();
+        break;
+    default:
+        break; // Moved / BombPlaced / BombExploded / Died aren't scored directly
     }
+}
 
-    void Score::loadHighScores(const std::string& path) {
+void Score::loadHighScores(const std::string& path) {
     highScores.clear();
     try {
         std::ifstream file(path);

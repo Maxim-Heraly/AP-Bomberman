@@ -6,18 +6,18 @@
 
 namespace bomberman::representation {
 
-    class ScoreView {
-    public:
-        ScoreView(std::shared_ptr<const logic::Score> score);
+class ScoreView {
+public:
+    ScoreView(std::shared_ptr<const logic::Score> score);
 
-        void draw(sf::RenderWindow& window, int x, int y) const;
+    void draw(sf::RenderWindow& window, int x, int y) const;
 
-    private:
-        std::shared_ptr<const logic::Score> score = logic::Score::getInstance();
-        mutable sf::Text scoreText;
-        sf::Font font;
+private:
+    std::shared_ptr<const logic::Score> score = logic::Score::getInstance();
+    mutable sf::Text scoreText;
+    sf::Font font;
 
-        void updateText() const;
-    };
+    void updateText() const;
+};
 
 } // namespace bomberman::representation

@@ -19,24 +19,26 @@ public:
 
     void update(float deltaTime) override;
 
-
     [[nodiscard]] bool canPlaceBomb() const;
 
     bool tryPlaceBomb() {
-        if (!canPlaceBomb()) return false;
+        if (!canPlaceBomb())
+            return false;
         ++bombsPlaced;
         return true;
     }
 
     void onBombExploded() {
-        if (bombsPlaced > 0) --bombsPlaced;
+        if (bombsPlaced > 0)
+            --bombsPlaced;
     }
 
     void revertToPreviousPosition() { position = previousPosition; }
     [[nodiscard]] const Vector2& getPreviousPosition() const { return previousPosition; }
 
     void die() {
-        if (!alive) return;
+        if (!alive)
+            return;
         markDead();
         notify(EventType::Died);
     }

@@ -28,7 +28,7 @@ public:
     Score(const Score&) = delete;
     Score& operator=(const Score&) = delete;
 
-    void onNotify(const Subject &source, EventType event) override;
+    void onNotify(const Subject& source, EventType event) override;
 
     [[nodiscard]] int getCurrentScore() const { return currentScore; }
     void setCurrentScore(const int score) { currentScore = score; }

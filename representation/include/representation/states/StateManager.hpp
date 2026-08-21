@@ -2,7 +2,10 @@
 
 #include <memory>
 
-namespace sf { class Event; class RenderWindow; }
+namespace sf {
+class Event;
+class RenderWindow;
+} // namespace sf
 
 namespace bomberman::representation {
 

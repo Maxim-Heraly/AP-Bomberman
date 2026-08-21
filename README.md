@@ -1,35 +1,9 @@
 # Bomberman — Advanced Programming Project 2025-2026
 
-**Name:** TODO
-**Student number:** TODO
-**GitHub repo:** TODO — paste the link here (required, see section 4.3 "Submitting")
+**Name:** Maxim Heraly
+**Student number:** 20232193
+**GitHub repo:** https://github.com/Maxim-Heraly/AP-Bomberman.git
 
-## Building
-
-```
-mkdir build && cd build
-cmake ..
-cmake --build .
-```
-
-Requires SFML 2.6.x, CMake ≥ 3.28, and a C++17 compiler. This skeleton was
-verified to configure and build with zero warnings (`-Wall -Wextra
--Wpedantic`) on the exact reference lab platform: Ubuntu 24.04, SFML 2.6.1,
-CMake 3.28.3, G++ 13.
-
-## Running the tests
-
-```
-cd build
-ctest --output-on-failure
-```
-
-## Running the game
-
-```
-cd build
-./representation/bomberman
-```
 
 ## Project layout
 
@@ -45,18 +19,19 @@ assets/spritesheets/   put your spritesheet(s) here — see the README there
 .circleci/config.yml   CI build (install deps, cmake, build, ctest)
 ```
 
-See section 3.1 ("Code Design") for *why* logic/ and representation/ are two
-separate CMake targets: logic/ must stay compilable and testable without
-SFML installed at all.
-
 ## Design decisions
 
-TODO: document your architecture and any deviations from this skeleton
-here, as required in section 4.2 "Core Functionality" (20%) — include your
-class diagrams too.
+The class diagram can be found in the 'class diagram' directory.
+
+Some choices I made in the design of the project are:
+1. making score a singleton:
+
+Since there is only 1 score in the game (player's score), it makes sense to make it a singleton. 
+This way, we can easily access the score from anywhere in the code without having to pass it around as a parameter.
+
+2. 
 
 ## Extensions implemented
 
-TODO: list and document any bonus extensions from section 2.3 you
-implemented (sounds, smarter bots, extra power-ups, alternative build
-system, multi-threading, generic programming, additional design patterns, ...).
+1. I added music to the menu, the game, and sound effects for a win or loss.
+2. Next to the required death animation, I also added a win animation which was deemed 'extra'.

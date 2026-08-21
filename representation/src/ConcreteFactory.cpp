@@ -11,7 +11,6 @@
 #include "representation/views/PowerUpView.hpp"
 #include "representation/views/WallView.hpp"
 
-
 namespace bomberman::representation {
 
 using namespace bomberman::logic;
@@ -32,7 +31,7 @@ ConcreteFactory::ConcreteFactory() {
 }
 
 std::shared_ptr<Character> ConcreteFactory::createCharacter(Vector2 position, const bool isPlayer) {
-    Vector2 characterSize{2.f/15*0.8, 2.f/13*0.8};
+    Vector2 characterSize{2.f / 15 * 0.8, 2.f / 13 * 0.8};
     std::shared_ptr<Character> model;
     if (isPlayer) {
         model = std::make_shared<Player>(position, characterSize);
@@ -41,14 +40,10 @@ std::shared_ptr<Character> ConcreteFactory::createCharacter(Vector2 position, co
         model = std::make_shared<Bot>(position, characterSize);
     }
 
-    const auto variant = isPlayer
-        ? CharacterSpriteVariant::Player
-        : static_cast<CharacterSpriteVariant>(1 + (nextBotVariant++ % 3));
+    const auto variant =
+        isPlayer ? CharacterSpriteVariant::Player : static_cast<CharacterSpriteVariant>(1 + (nextBotVariant++ % 3));
 
-    const auto view = std::make_shared<CharacterView>(
-        model,
-        characterTexture,
-        makeCharacterAnimationSet(variant));
+    const auto view = std::make_shared<CharacterView>(model, characterTexture, makeCharacterAnimationSet(variant));
 
     model->attach(view);
     views.push_back(view);
@@ -56,9 +51,10 @@ std::shared_ptr<Character> ConcreteFactory::createCharacter(Vector2 position, co
 }
 
 std::shared_ptr<Bomb> ConcreteFactory::createBomb(Vector2 position, std::shared_ptr<Character> owner) {
-    if (!owner) return nullptr;
+    if (!owner)
+        return nullptr;
 
-    Vector2 bombSize{2.f/15*0.9, 2.f/13*0.9};
+    Vector2 bombSize{2.f / 15 * 0.9, 2.f / 13 * 0.9};
     auto model = std::make_shared<Bomb>(position, bombSize, owner, owner->getBombRadius());
 
     const auto view = std::make_shared<BombView>(model, arenaTexture, makeBombAnimationSet());
@@ -69,9 +65,11 @@ std::shared_ptr<Bomb> ConcreteFactory::createBomb(Vector2 position, std::shared_
 }
 
 std::shared_ptr<Wall> ConcreteFactory::createWall(Vector2 position, bool destructible) {
-    Vector2 wallSize{2.f/15, 2.f/13};
+    Vector2 wallSize{2.f / 15, 2.f / 13};
     auto model = std::make_shared<Wall>(position, wallSize, destructible);
-    const auto view = std::make_shared<WallView>(model, arenaTexture, makeWallAnimationSet(destructible ? WallSpriteVariant::Destructible : WallSpriteVariant::Indestructible));
+    const auto view = std::make_shared<WallView>(
+        model, arenaTexture,
+        makeWallAnimationSet(destructible ? WallSpriteVariant::Destructible : WallSpriteVariant::Indestructible));
     model->attach(view);
     views.push_back(view);
 
@@ -79,25 +77,26 @@ std::shared_ptr<Wall> ConcreteFactory::createWall(Vector2 position, bool destruc
 }
 
 std::shared_ptr<PowerUp> ConcreteFactory::createPowerUp(Vector2 position, const PowerUpType type) {
-    Vector2 powerUpSize{2.f/15*0.9, 2.f/13*0.9};
+    Vector2 powerUpSize{2.f / 15 * 0.9, 2.f / 13 * 0.9};
 
     if (type == PowerUpType::Fire) {
         auto model = std::make_shared<FirePowerUp>(position, powerUpSize);
-        const auto view = std::make_shared<PowerUpView>(model, powerUpTexture, PowerUpView::getPowerUpAnimation(PowerUpSpriteVariant::Fire));
+        const auto view = std::make_shared<PowerUpView>(model, powerUpTexture,
+                                                        PowerUpView::getPowerUpAnimation(PowerUpSpriteVariant::Fire));
         model->attach(view);
         views.push_back(view);
         return model;
-    }
-    else if (type == PowerUpType::ExtraBomb) {
+    } else if (type == PowerUpType::ExtraBomb) {
         auto model = std::make_shared<BombPowerUp>(position, powerUpSize);
-        const auto view = std::make_shared<PowerUpView>(model, powerUpTexture, PowerUpView::getPowerUpAnimation(PowerUpSpriteVariant::ExtraBomb));
+        const auto view = std::make_shared<PowerUpView>(
+            model, powerUpTexture, PowerUpView::getPowerUpAnimation(PowerUpSpriteVariant::ExtraBomb));
         model->attach(view);
         views.push_back(view);
         return model;
-    }
-    else if (type == PowerUpType::Skates) {
+    } else if (type == PowerUpType::Skates) {
         auto model = std::make_shared<SkatesPowerUp>(position, powerUpSize);
-        const auto view = std::make_shared<PowerUpView>(model, powerUpTexture, PowerUpView::getPowerUpAnimation(PowerUpSpriteVariant::Skates));
+        const auto view = std::make_shared<PowerUpView>(model, powerUpTexture,
+                                                        PowerUpView::getPowerUpAnimation(PowerUpSpriteVariant::Skates));
         model->attach(view);
         views.push_back(view);
         return model;

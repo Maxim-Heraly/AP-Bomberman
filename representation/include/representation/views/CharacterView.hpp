@@ -2,12 +2,12 @@
 
 #include "logic/entities/Character.hpp"
 #include "representation/views/EntityView.hpp"
-#include <memory>
 #include <array>
+#include <memory>
 
 namespace bomberman::representation {
 
-enum class CharacterSpriteVariant {Player, Bot1, Bot2, Bot3};
+enum class CharacterSpriteVariant { Player, Bot1, Bot2, Bot3 };
 
 struct CharacterAnimationSet {
     std::array<sf::IntRect, 4> idle;
@@ -18,12 +18,10 @@ struct CharacterAnimationSet {
 
 CharacterAnimationSet makeCharacterAnimationSet(CharacterSpriteVariant variant);
 
-
 class CharacterView : public EntityView {
 public:
-    CharacterView(std::shared_ptr<const logic::Character> model,
-                  std::shared_ptr<sf::Texture> texture,
-                  const CharacterAnimationSet &animationSet);
+    CharacterView(std::shared_ptr<const logic::Character> model, std::shared_ptr<sf::Texture> texture,
+                  const CharacterAnimationSet& animationSet);
     void update(float deltaTime) override;
 
     void onNotify(const logic::Subject& source, logic::EventType event) override;

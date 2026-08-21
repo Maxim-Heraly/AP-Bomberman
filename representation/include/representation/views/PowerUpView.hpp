@@ -2,24 +2,22 @@
 
 #include "logic/entities/PowerUp.hpp"
 #include "representation/views/EntityView.hpp"
-#include <memory>
 #include <array>
+#include <memory>
 
 namespace bomberman::representation {
 
-    enum class PowerUpSpriteVariant { Fire, ExtraBomb, Skates };
+enum class PowerUpSpriteVariant { Fire, ExtraBomb, Skates };
 
 class PowerUpView : public EntityView {
 public:
-    explicit PowerUpView(std::shared_ptr<const logic::PowerUp> model,
-                         std::shared_ptr<sf::Texture> texture,
-                         const std::array<sf::IntRect, 2> &animationFrames);
+    explicit PowerUpView(std::shared_ptr<const logic::PowerUp> model, std::shared_ptr<sf::Texture> texture,
+                         const std::array<sf::IntRect, 2>& animationFrames);
 
     void onNotify(const logic::Subject& source, logic::EventType event) override;
     void draw(sf::RenderWindow& window, const Camera& camera) override;
 
     static std::array<sf::IntRect, 2> getPowerUpAnimation(PowerUpSpriteVariant variant);
-
 
 private:
     std::shared_ptr<const logic::PowerUp> model;

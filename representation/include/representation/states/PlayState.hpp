@@ -8,7 +8,6 @@
 #include "representation/states/State.hpp"
 #include <memory>
 
-
 namespace bomberman::representation {
 
 /**

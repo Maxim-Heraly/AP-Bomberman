@@ -10,7 +10,6 @@ namespace bomberman::logic {
 class Player : public Character {
 public:
     Player(const Vector2 position, const Vector2 size) : Character(position, size) {}
-
 };
 
 } // namespace bomberman::logic

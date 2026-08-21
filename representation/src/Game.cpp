@@ -29,13 +29,12 @@ void Game::processEvents() {
     }
 }
 
-void Game::update(float deltaTime) const {
-    stateManager.update(deltaTime);
-}
+void Game::update(float deltaTime) const { stateManager.update(deltaTime); }
 
 void Game::render() {
     window.clear(sf::Color(27, 61, 42)); // A dark neutral background behind the arena.
     stateManager.render(window);
-    window.display();}
+    window.display();
+}
 
 } // namespace bomberman::representation

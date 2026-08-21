@@ -1,37 +1,41 @@
 #include "representation/states/PlayState.hpp"
-#include "representation/states/MenuState.hpp"
+#include "logic/Score.hpp"
 #include "logic/entities/Character.hpp"
+#include "representation/AudioManager.hpp"
+#include "representation/states/MenuState.hpp"
 #include "representation/states/StateManager.hpp"
 #include "representation/views/ScoreView.hpp"
-#include "representation/AudioManager.hpp"
-#include "logic/Score.hpp"
 
 namespace bomberman::representation {
 
 PlayState::PlayState(StateManager& manager)
-    : State(manager),
-      factory(std::make_shared<ConcreteFactory>()),
-      world(factory),
-      score(logic::Score::getInstance()),
+    : State(manager), factory(std::make_shared<ConcreteFactory>()), world(factory), score(logic::Score::getInstance()),
       camera(900, 690) {
     world.initialize();
     AudioManager::getInstance().playGameplayMusic();
 }
 
 namespace {
-    logic::Direction keyToDirection(const sf::Keyboard::Key key) {
-        switch (key) {
-            case sf::Keyboard::Up: return logic::Direction::Up;
-            case sf::Keyboard::Down: return logic::Direction::Down;
-            case sf::Keyboard::Left: return logic::Direction::Left;
-            case sf::Keyboard::Right: return logic::Direction::Right;
-            default: return logic::Direction::None;
-        }
-    }}
+logic::Direction keyToDirection(const sf::Keyboard::Key key) {
+    switch (key) {
+    case sf::Keyboard::Up:
+        return logic::Direction::Up;
+    case sf::Keyboard::Down:
+        return logic::Direction::Down;
+    case sf::Keyboard::Left:
+        return logic::Direction::Left;
+    case sf::Keyboard::Right:
+        return logic::Direction::Right;
+    default:
+        return logic::Direction::None;
+    }
+}
+} // namespace
 
 void PlayState::handleEvent(const sf::Event& event) {
     const auto player = world.getPlayer();
-    if (!player) return;
+    if (!player)
+        return;
     if (world.isGameOver()) {
         constexpr auto direction = logic::Direction::None;
         player->setMovementInput(direction);
@@ -77,7 +81,6 @@ void PlayState::update(const float deltaTime) {
             score->saveHighScores("../../highscores.txt");
             AudioManager::getInstance().stopMusic();
             manager.changeState(std::make_unique<MenuState>(manager));
-
         }
     }
 }
@@ -88,10 +91,12 @@ void PlayState::render(sf::RenderWindow& window) {
 
     const auto& views = factory->getViews();
     for (const auto& view : views) {
-        if (view->getDrawLayer() == 0) view->draw(window, camera);
+        if (view->getDrawLayer() == 0)
+            view->draw(window, camera);
     }
     for (const auto& view : views) {
-        if (view->getDrawLayer() == 1) view->draw(window, camera);
+        if (view->getDrawLayer() == 1)
+            view->draw(window, camera);
     }
     ScoreView scoreView(logic::Score::getInstance());
     scoreView.draw(window, 10, 10);

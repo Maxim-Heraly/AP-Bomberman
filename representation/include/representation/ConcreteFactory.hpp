@@ -1,8 +1,8 @@
 #pragma once
 
+#include "logic/Score.hpp"
 #include "logic/patterns/AbstractFactory.hpp"
 #include "representation/views/EntityView.hpp"
-#include "logic/Score.hpp"
 #include <vector>
 
 namespace bomberman::representation {
@@ -19,14 +19,10 @@ class ConcreteFactory : public logic::AbstractFactory {
 public:
     ConcreteFactory();
 
-    std::shared_ptr<logic::Character> createCharacter(
-        logic::Vector2 position, bool isPlayer) override;
-    std::shared_ptr<logic::Bomb> createBomb(
-        logic::Vector2 position, std::shared_ptr<logic::Character> owner) override;
-    std::shared_ptr<logic::Wall> createWall(
-        logic::Vector2 position, bool destructible) override;
-    std::shared_ptr<logic::PowerUp> createPowerUp(
-        logic::Vector2 position, logic::PowerUpType type) override;
+    std::shared_ptr<logic::Character> createCharacter(logic::Vector2 position, bool isPlayer) override;
+    std::shared_ptr<logic::Bomb> createBomb(logic::Vector2 position, std::shared_ptr<logic::Character> owner) override;
+    std::shared_ptr<logic::Wall> createWall(logic::Vector2 position, bool destructible) override;
+    std::shared_ptr<logic::PowerUp> createPowerUp(logic::Vector2 position, logic::PowerUpType type) override;
 
     [[nodiscard]] const std::vector<std::shared_ptr<EntityView>>& getViews() const { return views; }
 

@@ -39,13 +39,9 @@ void AudioManager::playLoopingTrack(sf::Music& music, Track which) {
     currentTrack = which;
 }
 
-void AudioManager::playMenuMusic() {
-    playLoopingTrack(menuMusic, Track::Menu);
-}
+void AudioManager::playMenuMusic() { playLoopingTrack(menuMusic, Track::Menu); }
 
-void AudioManager::playGameplayMusic() {
-    playLoopingTrack(gameplayMusic, Track::Gameplay);
-}
+void AudioManager::playGameplayMusic() { playLoopingTrack(gameplayMusic, Track::Gameplay); }
 
 void AudioManager::stopMusic() {
     // Only one of these is ever actually playing, but stopping both
