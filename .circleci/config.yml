@@ -27,7 +27,6 @@ jobs:
       - run: mkdir -p build
       - run: cd build && cmake ..
       - run: cd build && make
-      - run: cd build && sudo make install
       - run: |
           if [ -f Doxyfile ]; then
             doxygen Doxyfile
