@@ -6,6 +6,7 @@
 
 namespace bomberman::logic {
 void Score::onNotify(const Subject& source, const EventType event) {
+    //only events that directly affect the score are handled here, other events are ignored
     switch (event) {
     case EventType::PlayerDestroyedBlock:
         addBlockDestroyed();
@@ -64,7 +65,7 @@ void Score::saveHighScores(const std::string& path) const {
     // Insert this run's score into a *copy* of the current top-5, then keep
     // only the best 5 entries, so a low score simply doesn't make the cut.
     std::vector<HighScoreEntry> updated = highScores;
-    updated.push_back({"Player", currentScore}); // TODO: prompt for player initials instead of a fixed name.
+    updated.push_back({"Player", currentScore});
     std::sort(updated.begin(), updated.end(),
               [](const HighScoreEntry& a, const HighScoreEntry& b) { return a.score > b.score; });
     if (updated.size() > 5) {

@@ -4,22 +4,27 @@
 
 namespace bomberman::logic {
 
-/// Indestructible or destructible arena block. Mostly a data holder - the
-/// interesting logic (spawning a powerup when destroyed) lives in World,
-/// since it needs the AbstractFactory to create the PowerUp.
-class Wall : public EntityModel {
-public:
-    Wall(const Vector2 position, const Vector2 size, const bool destructible)
-        : EntityModel(position, size), destructible(destructible) {}
+    /// Represents an indestructible or destructible arena block.
+    /// World handles the destruction effects, such as spawning a PowerUp.
+    class Wall : public EntityModel {
+    public:
+        /// Creates a wall at the given position and size with its destruction
+        /// behaviour determined by whether it is destructible.
+        Wall(const Vector2 position, const Vector2 size, const bool destructible)
+            : EntityModel(position, size), destructible(destructible) {}
 
-    void update(float /*deltaTime*/) override {} // Walls are static, nothing to tick.
+        /// Walls are static, so no per-frame update is required.
+        void update(float /*deltaTime*/) override {}
 
-    [[nodiscard]] bool isDestructible() const { return destructible; }
+        /// Returns whether this wall can be destroyed by a bomb.
+        [[nodiscard]] bool isDestructible() const { return destructible; }
 
-    void destroy();
+        /// Marks the wall as dead and notifies observers that it was destroyed.
+        void destroy();
 
-private:
-    bool destructible;
-};
+    private:
+        /// Indicates whether bombs are allowed to destroy this wall.
+        bool destructible;
+    };
 
 } // namespace bomberman::logic

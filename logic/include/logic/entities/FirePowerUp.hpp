@@ -9,6 +9,8 @@ class FirePowerUp : public PowerUp {
 public:
     using PowerUp::PowerUp;
 
+    /// Increases the Character's bombs blast radius by one,
+    /// then removes this power-up and notifies observers that it was collected.
     void applyEffect(Character& character) override;
 };
 

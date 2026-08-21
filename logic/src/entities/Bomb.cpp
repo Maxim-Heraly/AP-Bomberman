@@ -6,7 +6,7 @@ namespace bomberman::logic {
 Bomb::Bomb(const Vector2 position, const Vector2 size, std::weak_ptr<Character> owner, const int radius)
     : EntityModel(position, size), owner(std::move(owner)), radius(radius) {}
 
-void Bomb::update(float deltaTime) {
+void Bomb::update(const float deltaTime) {
     if (exploded || !alive)
         return;
 
@@ -15,7 +15,7 @@ void Bomb::update(float deltaTime) {
         return;
 
     exploded = true;
-    if (auto ownerPtr = owner.lock()) {
+    if (const auto ownerPtr = owner.lock()) {
         ownerPtr->onBombExploded();
     }
 

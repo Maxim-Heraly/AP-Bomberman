@@ -9,7 +9,9 @@ namespace bomberman::logic {
 class BombPowerUp : public PowerUp {
 public:
     using PowerUp::PowerUp;
-
+    
+    /// Increases the Character's maximum number of active bombs by one,
+    /// then removes this power-up and notifies observers that it was collected.
     void applyEffect(Character& character) override;
 };
 

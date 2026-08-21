@@ -11,135 +11,173 @@ class World;
  * @brief Computer-controlled Character behaviour: a priority list
  * re-evaluated every tick by decideNextMove().
  *
- *   1. Flee any Bomb whose blast would currently reach this Bot. A
- *      breadth-first search over the arena grid finds the *nearest*
- *      safe tile, even if that takes several steps through the arena's
- *      1-wide corridors.
- *   2. Chase down any nearby PowerUp.
- *   3. Otherwise, hunt down and bomb the nearest destructible Wall.
- *   4. Once no destructible Walls are left (or nothing else applies),
- *      fall back to attacking the nearest Character.
- *   5. If nothing above applies, wander into a random open neighbour
- *      tile instead of standing still.
+ *   1. Flee any Bomb whose blast would currently reach this Bot.
+ *   2. Chase nearby PowerUps.
+ *   3. Hunt and destroy destructible Walls.
+ *   4. Attack the nearest Character when no higher-priority action applies.
+ *   5. Wander randomly when there is nothing else to do.
  *
- * Each helper below returns true once it has decided on an action for
- * this tick, so decideNextMove() just chains them in priority order.
+ * Each helper returns true when it has decided an action for the current tick.
  */
 class Bot : public Character {
 public:
+    /**
+     * @brief Creates a bot at the given position and size.
+     */
     Bot(const Vector2 position, const Vector2 size) : Character(position, size) {}
 
-    /// Called once per tick (by World::update(), before entities are
-    /// updated) - inspects the World and calls setMovementInput() /
-    /// World::placeBomb() accordingly.
+    /**
+     * @brief Evaluates the bot's behaviour priorities and chooses its action for the current tick.
+     *
+     * The bot first handles danger and then considers power-ups, walls, enemies, and finally wandering.
+     */
     void decideNextMove(World& world);
 
 private:
+    /**
+     * @brief Attempts to move the bot to safety from nearby bomb explosions.
+     *
+     * Uses a breadth-first search to find a safe escape route when necessary.
+     */
     bool tryFlee(const World& world);
+
+    /**
+     * @brief Attempts to move the bot towards a nearby PowerUp.
+     *
+     * Returns true when a PowerUp is found within the bot's detection range.
+     */
     bool tryCollectPowerUp(const World& world);
+
+    /**
+     * @brief Attempts to destroy a nearby destructible Wall or move towards one.
+     */
     bool tryBreakWalls(World& world);
+
+    /**
+     * @brief Attempts to attack the nearest Character within the bot's engagement range.
+     */
     bool tryAttack(World& world);
 
-    /// Points this Bot one grid step towards (targetCol, targetRow),
-    /// preferring whichever axis currently has the bigger gap; falls
-    /// back to the other axis if that direction turns out to be
-    /// blocked or dangerous. See the .cpp for what happens when
-    /// neither axis works.
+    /**
+     * @brief Moves one grid step towards the specified target tile.
+     *
+     * Prefers the axis with the larger distance and falls back to the other axis when blocked.
+     */
     bool stepToward(const World& world, int targetCol, int targetRow);
 
-    /// Fine-grained final approach towards an exact world position -
-    /// used once this Bot is already standing in a PowerUp's own grid
-    /// cell, since World::handleCollisions() only actually grants the
-    /// pickup once the (continuous) hitboxes truly overlap.
+    /**
+     * @brief Moves directly towards an exact world position.
+     *
+     * Used for the final approach when the bot and a PowerUp occupy the same grid cell.
+     */
     void chaseExactPosition(Vector2 targetPosition);
 
-    /// Wander into a random open neighbour when nothing higher-priority
-    /// needs doing. Commits to the chosen direction (via
-    /// wanderDirection) across ticks instead of re-rolling a fresh
-    /// random direction every single frame, which would otherwise make
-    /// idle Bots jitter in place rather than actually wandering.
+    /**
+     * @brief Chooses and follows a random safe neighbouring tile when the bot is idle.
+     *
+     * The selected direction is retained across ticks until it is no longer safe.
+     */
     void wander(const World& world);
 
-    /// Breadth-first search over walkable grid tiles, starting from
-    /// (startCol, startRow), for the nearest tile where this Bot would
-    /// not be caught in any live Bomb's blast. Returns the direction of
-    /// the first step of that shortest path, or Direction::None if no
-    /// safe tile is reachable at all.
+    /**
+     * @brief Finds the first direction of the shortest path to a safe tile.
+     *
+     * Returns Direction::None when no reachable safe tile can be found.
+     */
     [[nodiscard]] Direction findEscapeDirection(const World& world, int startCol, int startRow) const;
 
-    /// True if (col, row) is inside the arena and has no Wall or live
-    /// Bomb standing on it.
+    /**
+     * @brief Checks whether a grid tile is inside the arena and contains no Wall or live Bomb.
+     */
     static bool isWalkable(const World& world, int col, int row);
 
-    /// Like isWalkable(), but tests this Bot's REAL current (continuous,
-    /// possibly off-tile-center) hitbox against every Wall/Bomb using the
-    /// same axis-aligned overlap test World::handleCollisions() uses -
-    /// rather than comparing rounded grid cells, which silently assumes
-    /// a perfectly-centered Bot. See the .cpp for why that assumption
-    /// can be wrong and leave a Bot stuck standing on its own Bomb.
+    /**
+     * @brief Checks whether the bot's current hitbox can safely take one step in a direction.
+     *
+     * Unlike isWalkable(), this accounts for the bot's actual continuous position and hitbox.
+     */
     [[nodiscard]] bool isImmediateStepSafe(const World& world, Direction direction) const;
 
-    /// Like isWalkable(), but also refuses any currently-dangerous
-    /// tile. Used everywhere except findEscapeDirection()'s BFS, which
-    /// needs to be able to path *through* a dangerous tile to reach a
-    /// safe one on the other side of it.
+    /**
+     * @brief Checks whether a grid tile is walkable and outside all current bomb blast ranges.
+     */
     static bool isSafeToStepInto(const World& world, int col, int row);
 
-    /// Fallback used whenever every direction otherwise looks blocked:
-    /// returns the direction that nudges this Bot back towards the
-    /// center of whichever tile it currently (per worldToGridCoords)
-    /// occupies, or Direction::None if it's already centered within a
-    /// small tolerance. See the .cpp for why a Bot can end up needing
-    /// this - and why it's always safe to try even without an explicit
-    /// walkability check.
+    /**
+     * @brief Returns a direction that moves the bot back towards the centre of its current tile.
+     *
+     * Returns Direction::None when the bot is already sufficiently centred.
+     */
     [[nodiscard]] Direction recenteringDirection() const;
 
-    /// The direction chosen by the most recent tryFlee() call - a Bot
-    /// commits to an escape route instead of recomputing (and
-    /// potentially reversing) a brand-new BFS plan every single tick.
-    Direction fleeDirection{Direction::None};
-
-    /// The direction chosen by the most recent wander() call.
-    Direction wanderDirection{Direction::None};
-
-    bool detouring{false};
-    Direction detourDirection{Direction::None};
-    int detourTargetCol{0};
-    int detourTargetRow{0};
-
-    /// Finishes an in-progress detour started by stepToward(): keeps
-    /// stepping in detourDirection until this Bot is actually
-    /// centered on (detourTargetCol, detourTargetRow) - not just
-    /// until worldToGridCoords() rounds over to it - re-verifying
-    /// safety every tick. Returns true while still mid-crossing
-    /// (claims this tick's move); returns false once the detour is
-    /// complete or had to be abandoned, so decideNextMove() falls
-    /// through to a fresh, target-agnostic re-evaluation.
+    /**
+     * @brief Continues a detour that was started while approaching a blocked target.
+     *
+     * Returns true while the detour is still being followed.
+     */
     bool continueDetour(const World& world);
 
-    /// Like isImmediateStepSafe(), but tests the step from an explicit
-    /// (col, row) departure tile instead of deriving it by rounding
-    /// getPosition(). Needed by continueDetour(), which must keep validating
-    /// the *same* crossing over several ticks - re-deriving the departure tile
-    /// from getPosition() each tick starts reporting the arrival tile as soon
-    /// as this Bot passes the tile's midpoint (well before isCenteredOnTile()
-    /// considers it arrived), which tests one tile too far and freezes the Bot
-    /// straddling the crossover.
+    /**
+     * @brief Checks a movement step using an explicitly specified starting grid tile.
+     *
+     * This keeps multi-tick detours consistent even while the bot's continuous position changes.
+     */
     [[nodiscard]] bool isImmediateStepSafeFrom(const World& world, Direction direction, int col, int row) const;
 
-    /// Which (col, row) stepToward() last failed to make progress
-    /// towards, and for how many consecutive ticks it's been stuck on
-    /// that same target - see stepToward()'s .cpp comment for why this
-    /// exists (it bounds how long a Bot holds position at a blocked
-    /// target before giving up and letting a lower-priority behaviour,
-    /// e.g. wander(), try something else).
+    /**
+     * @brief Tracks the grid position that the bot is currently unable to reach.
+     */
     std::pair<int, int> stuckTarget{0, 0};
+
+    /**
+     * @brief Number of consecutive ticks spent unable to progress towards stuckTarget.
+     */
     int stuckTicks{0};
 
+    /**
+     * @brief Updates the watchdog that detects when the bot is physically unable to move.
+     */
     void updateStuckWatchdog();
 
+    /**
+     * @brief Bot position recorded during the previous watchdog check.
+     */
     Vector2 lastWatchdogPosition{};
+
+    /**
+     * @brief Number of consecutive ticks during which the bot has failed to move.
+     */
     int watchdogStuckTicks{0};
+
+    /**
+     * @brief Direction currently being followed while fleeing from a bomb.
+     */
+    Direction fleeDirection{Direction::None};
+
+    /**
+     * @brief Direction currently being followed while wandering.
+     */
+    Direction wanderDirection{Direction::None};
+
+    /**
+     * @brief Indicates whether the bot is currently following a detour around an obstacle.
+     */
+    bool detouring{false};
+
+    /**
+     * @brief Direction used to move during the current detour.
+     */
+    Direction detourDirection{Direction::None};
+
+    /**
+     * @brief Target column of the current detour.
+     */
+    int detourTargetCol{0};
+
+    /**
+     * @brief Target row of the current detour.
+     */
+    int detourTargetRow{0};
 };
 
 } // namespace bomberman::logic

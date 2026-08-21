@@ -5,6 +5,7 @@
 #include "logic/entities/PowerUp.hpp"
 #include "logic/entities/Wall.hpp"
 #include "logic/utils/Random.hpp"
+#include "logic/utils/Grid.hpp"
 #include <algorithm>
 #include <fstream>
 #include <functional>
@@ -14,6 +15,8 @@
 namespace bomberman::logic {
 
 namespace {
+
+    /// Allows the bomb's owner to temporarily walk through their newly placed bomb.
 bool isOwnedBombPassThrough(const std::shared_ptr<Character>& character, const std::shared_ptr<Bomb>& bomb) {
     if (!bomb->canOwnerPassThrough()) {
         return false;
@@ -22,16 +25,20 @@ bool isOwnedBombPassThrough(const std::shared_ptr<Character>& character, const s
     return owner && owner == character;
 }
 
+    /// Checks whether two axis-aligned hitboxes overlap.
 bool aabbOverlap(const Vector2& posA, const Vector2& sizeA, const Vector2& posB, const Vector2& sizeB) {
     const bool overlapX = std::abs(posA.x - posB.x) < (sizeA.x + sizeB.x) * 0.5f;
     const bool overlapY = std::abs(posA.y - posB.y) < (sizeA.y + sizeB.y) * 0.5f;
     return overlapX && overlapY;
 }
 
+    /// Checks whether the character was already inside the bomb before this update,
+    /// allowing them to move out of it without immediately being blocked.
 bool wasAlreadyOverlappingBomb(const std::shared_ptr<Character>& character, const std::shared_ptr<Bomb>& bomb) {
     return aabbOverlap(character->getPreviousPosition(), character->getHitbox(), bomb->getPosition(), bomb->getSize());
 }
 
+    /// Converts a movement direction to the corresponding blast-profile array index.
 std::size_t dirIndex(const Direction direction) {
     switch (direction) {
     case Direction::Up:
@@ -48,6 +55,7 @@ std::size_t dirIndex(const Direction direction) {
     return 1;
 }
 
+    /// Returns the world-space offset for moving one step in the given direction.
 Vector2 stepOffset(const Direction direction, float step) {
     switch (direction) {
     case Direction::Up:
@@ -63,7 +71,7 @@ Vector2 stepOffset(const Direction direction, float step) {
     }
     return {0.f, 0.f};
 }
-
+    /// Temporary entity used to test whether a particular tile is reached by a blast.
 struct BlastTile : EntityModel {
     BlastTile(const Vector2 position, const Vector2 size) : EntityModel(position, size) {}
     void update(float /*deltaTime*/) override {}
@@ -75,6 +83,8 @@ World::World(std::shared_ptr<AbstractFactory> factory) : factory(std::move(facto
 void World::initialize() { generateArena(); }
 
 void World::update(const float deltaTime) {
+    // While the game is running, update the score timer and let bots choose
+    // their next actions before the entities themselves are updated.
     if (!gameOver) {
         tickTimer += deltaTime;
 
@@ -102,6 +112,8 @@ void World::update(const float deltaTime) {
 
     handleCollisions();
 
+    // Collect exploded bombs first because exploding them may add or remove
+    // entities from the world.
     std::vector<std::shared_ptr<Bomb>> explodedBombs;
     explodedBombs.reserve(entities.size());
     for (const auto& entity : entities) {
@@ -116,10 +128,12 @@ void World::update(const float deltaTime) {
             explode(*bomb);
     }
 
+    // Remove entities that were destroyed during collision handling or explosions.
     entities.erase(std::remove_if(entities.begin(), entities.end(),
                                   [](const std::shared_ptr<EntityModel>& entity) { return !entity->isAlive(); }),
                    entities.end());
 
+    // Check the game result only after all deaths from this update have been processed.
     if (!gameOver && !player->isAlive()) {
         player->declareLoss();
         gameOver = true;
@@ -147,6 +161,8 @@ void World::placeBomb(Character& owner) {
     if (!owner.tryPlaceBomb())
         return;
 
+    // Resolve the owner back to the shared_ptr stored by the World so the bomb
+    // can keep a weak reference to the actual Character object.
     std::shared_ptr<Character> ownerPtr;
     if (player && player.get() == &owner) {
         ownerPtr = player;
@@ -165,12 +181,10 @@ void World::placeBomb(Character& owner) {
         return;
     }
 
-    constexpr float tileWidth = 2.0f / 15.0f;
-    constexpr float tileHeight = 2.0f / 13.0f;
-
+    // Snap the bomb to the center of the nearest arena tile.
     Vector2 pos = owner.getPosition();
-    pos.x = -1.0f + (std::round((pos.x + 1.0f - tileWidth * 0.5f) / tileWidth) + 0.5f) * tileWidth;
-    pos.y = -1.0f + (std::round((pos.y + 1.0f - tileHeight * 0.5f) / tileHeight) + 0.5f) * tileHeight;
+    pos.x = -1.0f + (std::round((pos.x + 1.0f - kTileWidth * 0.5f) / kTileWidth) + 0.5f) * kTileWidth;
+    pos.y = -1.0f + (std::round((pos.y + 1.0f - kTileHeight * 0.5f) / kTileHeight) + 0.5f) * kTileHeight;
 
     const auto bomb = factory->createBomb(pos, ownerPtr);
     if (!bomb) {
@@ -187,25 +201,16 @@ void World::generateArena() {
         throw std::runtime_error("Failed to load arena.txt");
     }
 
-    // Grid is 15 columns x 13 rows and must
-    // exactly fill [-1, 1] on both axes - so tile width/height are derived
-    // from the grid size rather than hardcoded, and can differ from each
-    // other since the world doesn't need square tiles (Camera stretches
-    // world space to the window independently on each axis anyway).
-    constexpr int kColumns = 15;
-    constexpr int kRows = 13;
-    constexpr float tileWidth = 2.0f / kColumns;
-    constexpr float tileHeight = 2.0f / kRows;
 
     std::string line;
-    float yPos = -1.0f + tileHeight * 0.5f;
+    float yPos = -1.0f + kTileHeight * 0.5f;
 
     while (std::getline(file, line)) {
-        float xPos = -1.0f + tileWidth * 0.5f;
+        float xPos = -1.0f + kTileWidth * 0.5f;
 
         for (char c : line) {
             if (c == ' ') {
-                xPos += tileWidth;
+                xPos += kTileWidth;
                 continue;
             }
 
@@ -244,14 +249,15 @@ void World::generateArena() {
                 break;
             }
 
-            xPos += tileWidth;
+            xPos += kTileWidth;
         }
 
-        yPos += tileHeight;
+        yPos += kTileHeight;
     }
 }
 
 void World::handleCollisions() const {
+    // Separate entities by type so collision checks only consider relevant objects.
     std::vector<std::shared_ptr<Character>> characters;
     std::vector<std::shared_ptr<Wall>> walls;
     std::vector<std::shared_ptr<Bomb>> bombs;
@@ -322,6 +328,8 @@ void World::handleCollisions() const {
 }
 
 void World::explode(Bomb& bomb) {
+        // Keep track of bombs already processed to prevent chain reactions from
+    // recursively processing the same bomb more than once.
     const auto start =
         std::find_if(entities.begin(), entities.end(), [&bomb](const std::shared_ptr<EntityModel>& entity) {
             auto candidate = std::dynamic_pointer_cast<Bomb>(entity);
@@ -338,6 +346,8 @@ void World::explode(Bomb& bomb) {
     const auto owner = startBomb->getOwner().lock();
     const bool ownerIsPlayer = owner && owner == player;
 
+    // Keep track of bombs already processed to prevent chain reactions from
+    // recursively processing the same bomb more than once.
     std::unordered_set<const Bomb*> processedBombs;
 
     std::function<void(const std::shared_ptr<Bomb>&)> explodeBomb = [&](const std::shared_ptr<Bomb>& currentBomb) {
@@ -349,6 +359,8 @@ void World::explode(Bomb& bomb) {
         const Vector2 stepSize = currentBomb->getSize();
         const int radius = std::max(1, currentBomb->getRadius());
 
+        // Trace the blast one tile at a time until its radius is reached
+        // or an obstacle stops it.
         for (const Direction direction : {Direction::Up, Direction::Down, Direction::Left, Direction::Right}) {
             const std::size_t index = dirIndex(direction);
             int visibleReach = 0;
@@ -366,6 +378,7 @@ void World::explode(Bomb& bomb) {
                     if (!entity->intersects(blastTile))
                         continue;
 
+                    // If the blast hits a destructible wall, destroy it and possibly spawn a power-up.
                     if (const auto wall = std::dynamic_pointer_cast<Wall>(entity)) {
                         if (wall->isDestructible()) {
                             wall->destroy();
@@ -393,6 +406,7 @@ void World::explode(Bomb& bomb) {
                         blockedByWall = true;
                         break;
                     }
+                    // If the blast hits another bomb, detonate it immediately and recursively
                     if (const auto otherBomb = std::dynamic_pointer_cast<Bomb>(entity)) {
                         if (!otherBomb->hasExploded()) {
                             otherBomb->detonateEarly();
@@ -401,6 +415,7 @@ void World::explode(Bomb& bomb) {
                         explodeBomb(otherBomb);
                         continue;
                     }
+                    // If the blast hits a Character, kill them.
                     if (const auto character = std::dynamic_pointer_cast<Character>(entity)) {
                         if (character != player && ownerIsPlayer) {
                             character->declareEnemyKilled();
@@ -408,6 +423,7 @@ void World::explode(Bomb& bomb) {
                         character->die();
                         continue;
                     }
+                    // If the blast hits a PowerUp, remove it from the world.
                     if (const auto powerUp = std::dynamic_pointer_cast<PowerUp>(entity)) {
                         powerUp->remove();
                         continue;
@@ -416,6 +432,8 @@ void World::explode(Bomb& bomb) {
                 if (blockedByWall) {
                     break;
                 }
+                // Store the calculated blast profile so the representation layer can
+                // render the correct explosion tiles and endpoints.
                 visibleReach = step;
                 hasNaturalEnd = (step == radius);
             }
