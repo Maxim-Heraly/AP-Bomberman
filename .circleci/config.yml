@@ -2,13 +2,41 @@ version: 2.1
 
 jobs:
   build:
-    resource_class: small
-    docker:
-      - image: ubuntu:24.04
+    machine:
+      image: ubuntu-2404:current
     steps:
       - checkout
-      - run: apt update
-      - run: DEBIAN_FRONTEND=noninteractive TZ=Europe/Brussels apt install -y gcc g++ libsfml-dev cmake git
+      - run: sudo apt update
+      - run: >
+          DEBIAN_FRONTEND=noninteractive TZ=Europe/Brussels sudo apt install -y 
+          build-essential 
+          cmake 
+          git 
+          doxygen 
+          libsfml-dev 
+          libudev-dev 
+          libopenal-dev 
+          libvorbis-dev 
+          libogg-dev 
+          libflac-dev 
+          libxrandr-dev 
+          libxcursor-dev 
+          libxi-dev 
+          libxinerama-dev 
+          libfreetype-dev
       - run: mkdir -p build
       - run: cd build && cmake ..
       - run: cd build && make
+      - run: cd build && sudo make install
+      - run: |
+          if [ -f Doxyfile ]; then
+            doxygen Doxyfile
+          elif [ -f build/Doxyfile ]; then
+            cd build && doxygen Doxyfile
+          else
+            echo "No Doxyfile found, skipping documentation generation."
+          fi
+      - store_artifacts:
+          path: build/installed
+      - store_artifacts:
+          path: build/doc
