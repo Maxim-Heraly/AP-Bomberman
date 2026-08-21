@@ -41,7 +41,7 @@ public:
      * @brief Creates a view for a Bomb using the supplied texture and animation frames.
      */
     BombView(std::shared_ptr<const logic::Bomb> model, std::shared_ptr<sf::Texture> texture,
-             const BombAnimationSet &animations);
+             const BombAnimationSet& animations);
 
     /**
      * @brief Reacts to bomb-related events from the model, notably the explosion event.
@@ -75,13 +75,13 @@ private:
     BombAnimationSet animations;              ///< Sprite-sheet regions used by the animations.
     mutable sf::Sprite sprite;                ///< SFML sprite reused to render each animation frame.
 
-    Phase phase{Phase::Fuse};                 ///< Current visual phase: fuse, explosion, or finished.
+    Phase phase{Phase::Fuse}; ///< Current visual phase: fuse, explosion, or finished.
 
-    float fuseFrameTimer{0.f};                ///< Accumulated time used to advance the fuse animation.
-    std::size_t fuseFrameIndex{0};             ///< Current frame of the bomb's fuse animation.
+    float fuseFrameTimer{0.f};     ///< Accumulated time used to advance the fuse animation.
+    std::size_t fuseFrameIndex{0}; ///< Current frame of the bomb's fuse animation.
 
-    float explosionFrameTimer{0.f};            ///< Accumulated time used to advance the explosion animation.
-    std::size_t explosionFrameIndex{0};        ///< Current frame of the explosion animation.
+    float explosionFrameTimer{0.f};     ///< Accumulated time used to advance the explosion animation.
+    std::size_t explosionFrameIndex{0}; ///< Current frame of the explosion animation.
 };
 
 } // namespace bomberman::representation

@@ -3,7 +3,8 @@
 
 namespace bomberman::logic {
 
-// Constants for hitbox scaling to make the character's hitbox slightly smaller than its visual representation to get around corners a bit easier.
+// Constants for hitbox scaling to make the character's hitbox slightly smaller than its visual representation to get
+// around corners a bit easier.
 namespace {
 constexpr float kHitboxScale = 0.9f;
 }

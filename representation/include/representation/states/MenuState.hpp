@@ -68,8 +68,7 @@ private:
      * current top-five high scores. The menu does not modify
      * individual high-score entries.
      */
-    std::shared_ptr<logic::Score> score =
-        logic::Score::getInstance();
+    std::shared_ptr<logic::Score> score = logic::Score::getInstance();
 
     /**
      * @brief Bounding rectangle of the PLAY button.

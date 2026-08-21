@@ -6,7 +6,7 @@
 
 namespace bomberman::logic {
 void Score::onNotify(const Subject& source, const EventType event) {
-    //only events that directly affect the score are handled here, other events are ignored
+    // only events that directly affect the score are handled here, other events are ignored
     switch (event) {
     case EventType::PlayerDestroyedBlock:
         addBlockDestroyed();

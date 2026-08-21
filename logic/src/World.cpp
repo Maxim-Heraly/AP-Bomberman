@@ -4,8 +4,8 @@
 #include "logic/entities/Character.hpp"
 #include "logic/entities/PowerUp.hpp"
 #include "logic/entities/Wall.hpp"
-#include "logic/utils/Random.hpp"
 #include "logic/utils/Grid.hpp"
+#include "logic/utils/Random.hpp"
 #include <algorithm>
 #include <fstream>
 #include <functional>
@@ -16,7 +16,7 @@ namespace bomberman::logic {
 
 namespace {
 
-    /// Allows the bomb's owner to temporarily walk through their newly placed bomb.
+/// Allows the bomb's owner to temporarily walk through their newly placed bomb.
 bool isOwnedBombPassThrough(const std::shared_ptr<Character>& character, const std::shared_ptr<Bomb>& bomb) {
     if (!bomb->canOwnerPassThrough()) {
         return false;
@@ -25,20 +25,20 @@ bool isOwnedBombPassThrough(const std::shared_ptr<Character>& character, const s
     return owner && owner == character;
 }
 
-    /// Checks whether two axis-aligned hitboxes overlap.
+/// Checks whether two axis-aligned hitboxes overlap.
 bool aabbOverlap(const Vector2& posA, const Vector2& sizeA, const Vector2& posB, const Vector2& sizeB) {
     const bool overlapX = std::abs(posA.x - posB.x) < (sizeA.x + sizeB.x) * 0.5f;
     const bool overlapY = std::abs(posA.y - posB.y) < (sizeA.y + sizeB.y) * 0.5f;
     return overlapX && overlapY;
 }
 
-    /// Checks whether the character was already inside the bomb before this update,
-    /// allowing them to move out of it without immediately being blocked.
+/// Checks whether the character was already inside the bomb before this update,
+/// allowing them to move out of it without immediately being blocked.
 bool wasAlreadyOverlappingBomb(const std::shared_ptr<Character>& character, const std::shared_ptr<Bomb>& bomb) {
     return aabbOverlap(character->getPreviousPosition(), character->getHitbox(), bomb->getPosition(), bomb->getSize());
 }
 
-    /// Converts a movement direction to the corresponding blast-profile array index.
+/// Converts a movement direction to the corresponding blast-profile array index.
 std::size_t dirIndex(const Direction direction) {
     switch (direction) {
     case Direction::Up:
@@ -55,7 +55,7 @@ std::size_t dirIndex(const Direction direction) {
     return 1;
 }
 
-    /// Returns the world-space offset for moving one step in the given direction.
+/// Returns the world-space offset for moving one step in the given direction.
 Vector2 stepOffset(const Direction direction, float step) {
     switch (direction) {
     case Direction::Up:
@@ -71,7 +71,7 @@ Vector2 stepOffset(const Direction direction, float step) {
     }
     return {0.f, 0.f};
 }
-    /// Temporary entity used to test whether a particular tile is reached by a blast.
+/// Temporary entity used to test whether a particular tile is reached by a blast.
 struct BlastTile : EntityModel {
     BlastTile(const Vector2 position, const Vector2 size) : EntityModel(position, size) {}
     void update(float /*deltaTime*/) override {}
@@ -201,7 +201,6 @@ void World::generateArena() {
         throw std::runtime_error("Failed to load arena.txt");
     }
 
-
     std::string line;
     float yPos = -1.0f + kTileHeight * 0.5f;
 
@@ -328,7 +327,7 @@ void World::handleCollisions() const {
 }
 
 void World::explode(Bomb& bomb) {
-        // Keep track of bombs already processed to prevent chain reactions from
+    // Keep track of bombs already processed to prevent chain reactions from
     // recursively processing the same bomb more than once.
     const auto start =
         std::find_if(entities.begin(), entities.end(), [&bomb](const std::shared_ptr<EntityModel>& entity) {

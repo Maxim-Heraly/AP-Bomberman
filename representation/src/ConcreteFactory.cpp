@@ -106,11 +106,10 @@ std::shared_ptr<PowerUp> ConcreteFactory::createPowerUp(Vector2 position, const 
 }
 
 void ConcreteFactory::purgeViews() {
-    views.erase(std::remove_if(views.begin(), views.end(),
-                       [](const std::shared_ptr<EntityView>& view) {
-                           return !view || view->isMarkedForRemoval();
-                       }),
-                views.end());
+    views.erase(
+        std::remove_if(views.begin(), views.end(),
+                       [](const std::shared_ptr<EntityView>& view) { return !view || view->isMarkedForRemoval(); }),
+        views.end());
 }
 
 } // namespace bomberman::representation

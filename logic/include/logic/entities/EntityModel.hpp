@@ -18,14 +18,12 @@ public:
     /**
      * @brief Creates an entity with a position, visual size and collision hitbox.
      */
-    EntityModel(Vector2 position, Vector2 size, Vector2 hitbox)
-        : position(position), size(size), hitbox(hitbox) {}
+    EntityModel(Vector2 position, Vector2 size, Vector2 hitbox) : position(position), size(size), hitbox(hitbox) {}
 
     /**
      * @brief Creates an entity whose hitbox is the same as its size.
      */
-    EntityModel(Vector2 position, Vector2 size)
-        : EntityModel(position, size, size) {}
+    EntityModel(Vector2 position, Vector2 size) : EntityModel(position, size, size) {}
 
     /// Virtual destructor for safe destruction through an EntityModel pointer.
     ~EntityModel() override = default;

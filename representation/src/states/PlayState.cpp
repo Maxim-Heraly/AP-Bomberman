@@ -36,7 +36,7 @@ void PlayState::handleEvent(const sf::Event& event) {
     const auto player = world.getPlayer();
     if (!player)
         return;
-    //stop movement input if the game is over, so that the player can't move anymore
+    // stop movement input if the game is over, so that the player can't move anymore
     if (world.isGameOver()) {
         constexpr auto direction = logic::Direction::None;
         player->setMovementInput(direction);
@@ -79,7 +79,7 @@ void PlayState::update(const float deltaTime) {
             won ? AudioManager::getInstance().playVictorySound() : AudioManager::getInstance().playLossSound();
         }
 
-        //Stay in the game over screen for 5 seconds before returning to the menu
+        // Stay in the game over screen for 5 seconds before returning to the menu
         timer += deltaTime;
         if (timer >= 5.0f) {
             score->saveHighScores("../../highscores.txt");
@@ -93,7 +93,7 @@ void PlayState::render(sf::RenderWindow& window) {
     const auto windowSize = window.getSize();
     camera.setWindowSize(windowSize.x, windowSize.y);
 
-    //Draw characters last
+    // Draw characters last
     const auto& views = factory->getViews();
     for (const auto& view : views) {
         if (view->getDrawLayer() == 0)

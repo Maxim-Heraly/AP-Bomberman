@@ -43,9 +43,7 @@ public:
      * @brief Returns all entities currently present in the world.
      * @return Read-only reference to the world's entity collection.
      */
-    [[nodiscard]] const std::vector<std::shared_ptr<EntityModel>>& getEntities() const {
-        return entities;
-    }
+    [[nodiscard]] const std::vector<std::shared_ptr<EntityModel>>& getEntities() const { return entities; }
 
     /**
      * @brief Returns the player character.

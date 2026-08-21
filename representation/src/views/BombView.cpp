@@ -17,7 +17,7 @@ sf::IntRect bombRect(int left, int top) { return {left, top, kBombFrameWidth, kB
 
 sf::IntRect explosionRect(int left, int top) { return {left, top, kExplosionFrameWidth, kExplosionFrameHeight}; }
 
-    // Maps Direction to the corresponding index used by Bomb::BlastProfile.
+// Maps Direction to the corresponding index used by Bomb::BlastProfile.
 std::size_t dirIndex(const logic::Direction direction) {
     switch (direction) {
     case logic::Direction::Up:
@@ -34,7 +34,7 @@ std::size_t dirIndex(const logic::Direction direction) {
     return 1;
 }
 
-    // Returns the world-space offset for one explosion segment in the given direction.
+// Returns the world-space offset for one explosion segment in the given direction.
 logic::Vector2 stepOffset(const logic::Direction direction, float step) {
     switch (direction) {
     case logic::Direction::Up:
@@ -83,7 +83,7 @@ BombAnimationSet makeBombAnimationSet() {
 }
 
 BombView::BombView(std::shared_ptr<const logic::Bomb> model, std::shared_ptr<sf::Texture> texture,
-                   const BombAnimationSet &animations)
+                   const BombAnimationSet& animations)
     : model(std::move(model)), texture(std::move(texture)), animations(animations) {
     sprite.setTexture(*this->texture);
 }

@@ -36,8 +36,7 @@ public:
      * @param owner Character that placed the bomb.
      * @return The created Bomb, or nullptr if owner is null.
      */
-    std::shared_ptr<logic::Bomb> createBomb(logic::Vector2 position,
-                                            std::shared_ptr<logic::Character> owner) override;
+    std::shared_ptr<logic::Bomb> createBomb(logic::Vector2 position, std::shared_ptr<logic::Character> owner) override;
 
     /**
      * @brief Creates a Wall model and the corresponding WallView.
@@ -53,8 +52,7 @@ public:
      * @param type Type of power-up to create.
      * @return The created PowerUp, or nullptr for an unsupported type.
      */
-    std::shared_ptr<logic::PowerUp> createPowerUp(logic::Vector2 position,
-                                                  logic::PowerUpType type) override;
+    std::shared_ptr<logic::PowerUp> createPowerUp(logic::Vector2 position, logic::PowerUpType type) override;
 
     /**
      * @brief Returns all Views currently owned by the factory for rendering.
