@@ -77,7 +77,7 @@ std::shared_ptr<Wall> ConcreteFactory::createWall(Vector2 position, bool destruc
 }
 
 std::shared_ptr<PowerUp> ConcreteFactory::createPowerUp(Vector2 position, const PowerUpType type) {
-    Vector2 powerUpSize{2.f / 15 * 0.9, 2.f / 13 * 0.9};
+    Vector2 powerUpSize{2.f / 15 * 0.8, 2.f / 13 * 0.8};
 
     if (type == PowerUpType::Fire) {
         auto model = std::make_shared<FirePowerUp>(position, powerUpSize);
