@@ -1,0 +1,93 @@
+<div id="cd"></div>
+<script type="module">
+import mermaid from 'https://esm.sh/mermaid@11/dist/mermaid.esm.min.mjs';
+const dark = matchMedia('(prefers-color-scheme: dark)').matches;
+await document.fonts.ready;
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'base',
+  fontFamily: '"anthropic-sans", sans-serif',
+  themeVariables: {
+    darkMode: dark,
+    fontSize: '13px',
+    fontFamily: '"anthropic-sans", sans-serif',
+    lineColor: dark ? '#9c9a92' : '#73726c',
+    textColor: dark ? '#c2c0b6' : '#3d3d3a',
+  },
+});
+const def = `classDiagram
+    namespace LogicLibrary {
+        class Observer {
+            <<interface>>
+        }
+        class Subject {
+            <<abstract>>
+        }
+        class Random
+        class Stopwatch
+        class Score
+        class EntityModel {
+            <<abstract>>
+        }
+        class World
+        class AbstractFactory {
+            <<interface>>
+        }
+        class Character {
+            <<abstract>>
+        }
+        class Bomb
+        class Wall
+        class PowerUp {
+            <<abstract>>
+        }
+        class Player
+        class Bot
+        class FirePowerUp
+        class BombPowerUp
+        class SkatesPowerUp
+    }
+    namespace GameRepresentation {
+        class EntityView {
+            <<abstract>>
+        }
+        class Camera
+        class ConcreteFactory
+        class Game
+        class StateManager
+        class State {
+            <<abstract>>
+        }
+        class MenuState
+        class PlayState
+        class CharacterView
+        class BombView
+        class WallView
+        class PowerUpView
+        class ScoreView
+        class AudioManager
+    }
+
+    Observer <|.. Score
+    Observer <|.. EntityView
+    Subject <|-- EntityModel
+    EntityModel <|-- Character
+    EntityModel <|-- Bomb
+    EntityModel <|-- Wall
+    EntityModel <|-- PowerUp
+    Character <|-- Player
+    Character <|-- Bot
+    PowerUp <|-- FirePowerUp
+    PowerUp <|-- BombPowerUp
+    PowerUp <|-- SkatesPowerUp
+    AbstractFactory <|.. ConcreteFactory
+    EntityView <|-- CharacterView
+    EntityView <|-- BombView
+    EntityView <|-- WallView
+    EntityView <|-- PowerUpView
+    State <|-- MenuState
+    State <|-- PlayState
+`;
+const { svg } = await mermaid.render('cd-svg', def);
+document.getElementById('cd').innerHTML = svg;
+</script>
