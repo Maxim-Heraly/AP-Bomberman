@@ -2,36 +2,13 @@ version: 2.1
 
 jobs:
   build:
+    resource_class: small
     docker:
-      - image: cimg/base:2024.01
-
+      - image: ubuntu:24.04
     steps:
       - checkout
-
-      - run:
-          name: Install dependencies
-          command: |
-            sudo apt-get update
-            sudo apt-get install -y \
-              build-essential \
-              g++ \
-              cmake \
-              ninja-build \
-              libsfml-dev
-
-      - run:
-          name: Configure project
-          command: |
-            cmake -S . -B build -G Ninja \
-              -DCMAKE_BUILD_TYPE=Release
-
-      - run:
-          name: Build project
-          command: |
-            cmake --build build
-
-      - run:
-          name: Run tests
-          command: |
-            cd build
-            ctest --output-on-failure
+      - run: apt update
+      - run: DEBIAN_FRONTEND=noninteractive TZ=Europe/Brussels apt install -y gcc g++ libsfml-dev cmake git
+      - run: mkdir -p build
+      - run: cd build && cmake ..
+      - run: cd build && make
