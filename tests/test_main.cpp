@@ -139,12 +139,12 @@ void testBombFuseCountsDown() {
     ASSERT(!bomb.hasExploded(), "A freshly placed bomb should not have exploded yet");
 
     bomb.update(1.f);
-    ASSERT(!bomb.hasExploded(), "Bomb should still be ticking after 1 of 3 seconds");
+    ASSERT(!bomb.hasExploded(), "Bomb should still be ticking after 1 of 2 seconds");
 
-    bomb.update(1.f);
-    ASSERT(!bomb.hasExploded(), "Bomb should still be ticking after 2 of 3 seconds");
+    bomb.update(.5f);
+    ASSERT(!bomb.hasExploded(), "Bomb should still be ticking after 1.5 of 2 seconds");
 
-    bomb.update(1.5f); // total elapsed: 3.5s, past the 3s fuse
+    bomb.update(1.f); // total elapsed: 2.5s, past the 2s fuse
     ASSERT(bomb.hasExploded(), "Bomb should have exploded once its fuse ran out");
     ASSERT(!bomb.isAlive(), "An exploded bomb should be marked dead");
 }
