@@ -69,6 +69,7 @@ void PlayState::update(const float deltaTime) {
     for (const auto& view : factory->getViews()) {
         view->update(deltaTime);
     }
+    factory->purgeViews();
 
     if (world.isGameOver()) {
         if (!resultSoundPlayed) {

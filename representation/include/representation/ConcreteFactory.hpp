@@ -25,6 +25,7 @@ public:
     std::shared_ptr<logic::PowerUp> createPowerUp(logic::Vector2 position, logic::PowerUpType type) override;
 
     [[nodiscard]] const std::vector<std::shared_ptr<EntityView>>& getViews() const { return views; }
+    void purgeViews();
 
 private:
     std::vector<std::shared_ptr<EntityView>> views;
