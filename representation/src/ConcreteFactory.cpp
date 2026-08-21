@@ -6,6 +6,7 @@
 #include "logic/entities/Player.hpp"
 #include "logic/entities/SkatesPowerUp.hpp"
 #include "logic/entities/Wall.hpp"
+#include "logic/utils/Grid.hpp"
 #include "representation/views/BombView.hpp"
 #include "representation/views/CharacterView.hpp"
 #include "representation/views/PowerUpView.hpp"
@@ -31,7 +32,7 @@ ConcreteFactory::ConcreteFactory() {
 }
 
 std::shared_ptr<Character> ConcreteFactory::createCharacter(Vector2 position, const bool isPlayer) {
-    Vector2 characterSize{2.f / 15 * 0.8, 2.f / 13 * 0.8};
+    Vector2 characterSize{kTileWidth * 0.8, kTileHeight * 0.8};
     std::shared_ptr<Character> model;
     if (isPlayer) {
         model = std::make_shared<Player>(position, characterSize);
@@ -54,7 +55,7 @@ std::shared_ptr<Bomb> ConcreteFactory::createBomb(Vector2 position, std::shared_
     if (!owner)
         return nullptr;
 
-    Vector2 bombSize{2.f / 15 * 0.9, 2.f / 13 * 0.9};
+    Vector2 bombSize{kTileWidth * 0.9, kTileHeight * 0.9};
     auto model = std::make_shared<Bomb>(position, bombSize, owner, owner->getBombRadius());
 
     const auto view = std::make_shared<BombView>(model, arenaTexture, makeBombAnimationSet());
@@ -65,7 +66,7 @@ std::shared_ptr<Bomb> ConcreteFactory::createBomb(Vector2 position, std::shared_
 }
 
 std::shared_ptr<Wall> ConcreteFactory::createWall(Vector2 position, bool destructible) {
-    Vector2 wallSize{2.f / 15, 2.f / 13};
+    Vector2 wallSize{kTileWidth, kTileHeight};
     auto model = std::make_shared<Wall>(position, wallSize, destructible);
     const auto view = std::make_shared<WallView>(
         model, arenaTexture,
@@ -77,7 +78,7 @@ std::shared_ptr<Wall> ConcreteFactory::createWall(Vector2 position, bool destruc
 }
 
 std::shared_ptr<PowerUp> ConcreteFactory::createPowerUp(Vector2 position, const PowerUpType type) {
-    Vector2 powerUpSize{2.f / 15 * 0.8, 2.f / 13 * 0.8};
+    Vector2 powerUpSize{kTileWidth * 0.8, kTileHeight * 0.8};
 
     if (type == PowerUpType::Fire) {
         auto model = std::make_shared<FirePowerUp>(position, powerUpSize);
